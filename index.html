@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,19 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Comissionamento TCMW</title>
 <!-- Dashboard de Comissionamento TCMW · arquivo único para GitHub Pages.
-     Para atualizar: edite a lista POINTS e o array REPORTS abaixo. -->
+     Sem biblioteca de gráficos: tudo em SVG/CSS. Para atualizar: edite POINTS e REPORTS. -->
 <script src="https://cdn.tailwindcss.com"></script>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/prop-types/prop-types.min.js"></script>
-<script crossorigin src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script>
+window.addEventListener('error', function(e){
+  var r = document.getElementById('root');
+  if (r) r.innerHTML = '<div style="padding:16px;font-family:monospace;color:#b91c1c;white-space:pre-wrap;font-size:13px">Erro ao carregar o dashboard:\n\n' + (e.message || e.error || e) + '</div>';
+});
+</script>
 </head>
 <body>
 <div id="root" class="text-sm text-slate-500 p-6">Carregando dashboard…</div>
-<script type="text/babel">
+<script type="text/babel" data-presets="react">
 const { useState } = React;
-const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, ReferenceLine } = Recharts;
 
 // ── FONTE ÚNICA DE VERDADE ──────────────────────────────────────────────
 const REF = '2026-06-08';
@@ -99,6 +103,75 @@ const buildTC = () => TC_ORDER.map(tc => { const it = POINTS.filter(p=>p.tc===tc
 
 const ageColor = (idade, status) => status==='falha'||idade>=6 ? {bar:'bg-red-500',txt:'text-red-600',bg:'bg-red-50'} : idade>=3 ? {bar:'bg-amber-500',txt:'text-amber-600',bg:'bg-amber-50'} : {bar:'bg-slate-400',txt:'text-slate-600',bg:'bg-slate-50'};
 
+// ── GRÁFICOS (SVG/CSS puro, sem biblioteca) ─────────────────────────────
+function Burndown({data}) {
+  const W=320, H=190, padL=24, padB=24, padT=8, padR=8;
+  const maxY = Math.max(...data.map(d=>d.total), 1);
+  const n = data.length;
+  const x = i => padL + (n<=1 ? 0 : i*(W-padL-padR)/(n-1));
+  const y = v => H-padB - (v/maxY*(H-padB-padT));
+  const poly = (key,color,dash) => <polyline points={data.map((d,i)=>x(i)+','+y(d[key])).join(' ')} fill="none" stroke={color} strokeWidth="2.5" strokeDasharray={dash||''} strokeLinejoin="round"/>;
+  const dots = (key,color) => data.map((d,i)=><circle key={key+i} cx={x(i)} cy={y(d[key])} r="3.5" fill={color}/>);
+  const grid = [0,0.5,1].map((f,i)=>{ const yy=H-padB-(f*(H-padB-padT)); return <g key={i}><line x1={padL} y1={yy} x2={W-padR} y2={yy} stroke="#eef2f7"/><text x="0" y={yy+3} fontSize="8" fill="#94a3b8">{Math.round(f*maxY)}</text></g>; });
+  const legend = [['Levantados','#cbd5e1'],['Resolvidos','#10b981'],['Em aberto','#0891b2']];
+  return (
+    <div>
+      <svg viewBox={"0 0 "+W+" "+H} className="w-full" style={{height:200}}>
+        {grid}
+        {poly('total','#cbd5e1','5 5')}
+        {poly('resolvidos','#10b981')}
+        {poly('abertos','#0891b2')}
+        {dots('total','#cbd5e1')}{dots('resolvidos','#10b981')}{dots('abertos','#0891b2')}
+        {data.map((d,i)=><text key={i} x={x(i)} y={H-padB+14} fontSize="9" fill="#64748b" textAnchor="middle">{d.label}</text>)}
+      </svg>
+      <div className="flex gap-3 justify-center mt-1 flex-wrap">
+        {legend.map(([l,c])=><span key={l} className="text-[11px] text-slate-500 flex items-center gap-1"><span className="inline-block w-3 h-1.5 rounded" style={{background:c}}></span>{l}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function Bars({data}) {
+  const max = Math.max(...data.map(d=>d.resolvido+d.pendente+d.falha), 1);
+  const seg = [['resolvido','#10b981'],['pendente','#f59e0b'],['falha','#ef4444']];
+  return (
+    <div>
+      <div className="space-y-2">
+        {data.map((d,i)=>(
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-24 text-[11px] text-slate-600 text-right shrink-0 leading-tight">{d.name}</div>
+            <div className="flex-1 flex h-5 rounded overflow-hidden bg-slate-100">
+              {seg.map(([k,c])=> d[k]>0 ? <div key={k} style={{width:(d[k]/max*100)+'%',background:c}} className="flex items-center justify-center text-[9px] text-white font-bold">{d[k]}</div> : null)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-3 justify-center mt-3 flex-wrap">
+        {seg.map(([k,c])=><span key={k} className="text-[11px] text-slate-500 flex items-center gap-1 capitalize"><span className="inline-block w-3 h-3 rounded-sm" style={{background:c}}></span>{k}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function StatusPie({data}) {
+  const total = data.reduce((s,d)=>s+d.value,0) || 1;
+  let acc = 0;
+  const stops = data.map(d=>{ const a=acc/total*360; acc+=d.value; const b=acc/total*360; return d.color+" "+a+"deg "+b+"deg"; }).join(', ');
+  return (
+    <div className="flex items-center justify-center gap-5 flex-wrap py-2">
+      <div className="rounded-full shrink-0" style={{width:150,height:150,background:"conic-gradient("+stops+")"}}></div>
+      <div className="space-y-1.5">
+        {data.map((d,i)=>(
+          <div key={i} className="flex items-center gap-2 text-xs text-slate-600">
+            <span className="inline-block w-3 h-3 rounded-sm" style={{background:d.color}}></span>
+            <span>{d.name}</span><span className="font-bold text-slate-800">{d.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const [activeInsight, setActiveInsight] = useState(0);
   const [print, setPrint] = useState(false);
@@ -116,7 +189,6 @@ function Dashboard() {
   const tratamento = openPts.filter(p=>p.classe==='tratamento');
   const melhorias = openPts.filter(p=>p.classe==='melhoria');
   const liberavel = impeditivos.length===0;
-
   const card = print ? "bg-white border border-slate-200 rounded-2xl" : "bg-white rounded-2xl shadow";
 
   const KPIS = [
@@ -130,7 +202,6 @@ function Dashboard() {
     <div className={print ? "min-h-screen bg-white p-4" : "min-h-screen bg-slate-50 p-4"}>
       <div className="max-w-5xl mx-auto space-y-4">
 
-        {/* Header */}
         <div className={card + " p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3"}>
           <div>
             <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -152,13 +223,11 @@ function Dashboard() {
             <p className="text-slate-500 text-sm mt-1">Secagem de minério por micro-ondas · Resp.: Everton da Silva Campos · {total} pontos</p>
             <p className="text-xs text-slate-400 mt-1">Último marco: 08/06/2026 · histórico desde 28/05</p>
           </div>
-          <button onClick={()=>setPrint(!print)}
-            className={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all " + (print ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50')}>
+          <button onClick={()=>setPrint(!print)} className={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all " + (print ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50')}>
             🖨️ {print ? 'Tela' : 'Impressão'}
           </button>
         </div>
 
-        {/* FASE */}
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2">🚀 Fase do comissionamento</h3>
           <div className="flex items-center gap-2">
@@ -180,7 +249,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* SELO */}
         <div className={"rounded-2xl p-5 border-2 " + (liberavel ? 'border-emerald-400 bg-emerald-50' : 'border-amber-400 bg-amber-50')}>
           <div className="flex items-start gap-3">
             <span className="text-2xl mt-0.5">🛡️</span>
@@ -209,7 +277,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {KPIS.map((k,i)=> print ? (
             <div key={i} className={"bg-white border-l-4 " + k.bord + " border border-slate-200 rounded-2xl p-4"}>
@@ -227,7 +294,6 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* TESTES COM CARGA */}
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">🚀 Testes com carga (periféricos)</h3>
           <p className="text-slate-400 text-xs mb-3">Fase iniciada em 08/06 · teste dos periféricos sob fluxo de minério</p>
@@ -251,27 +317,12 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Burndown */}
         <div className={card + " p-5"}>
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="font-bold text-slate-700 flex items-center gap-2">📉 Burndown · evolução por relatório</h3>
-            <span className="text-xs text-slate-400">meta: abertos → 0</span>
-          </div>
+          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📉 Burndown · evolução por relatório</h3>
           <p className="text-slate-400 text-xs mb-3">28/05 · 29/05 · 03/06 · 08/06 (teste do skid)</p>
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={burndown} margin={{left:-12, right:12, top:8}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
-              <XAxis dataKey="label" tick={{fontSize:11}}/><YAxis tick={{fontSize:11}} allowDecimals={false}/>
-              <Tooltip/><Legend iconSize={10} wrapperStyle={{fontSize:11}}/>
-              <ReferenceLine y={0} stroke="#10b981" strokeDasharray="4 4"/>
-              <Line type="monotone" dataKey="total" stroke="#cbd5e1" strokeWidth={2} strokeDasharray="5 5" dot={{r:3}} name="Levantados"/>
-              <Line type="monotone" dataKey="resolvidos" stroke="#10b981" strokeWidth={2.5} dot={{r:3}} name="Resolvidos"/>
-              <Line type="monotone" dataKey="abertos" stroke="#0891b2" strokeWidth={3} dot={{r:4}} activeDot={{r:6}} name="Em aberto"/>
-            </LineChart>
-          </ResponsiveContainer>
+          <Burndown data={burndown}/>
         </div>
 
-        {/* TC */}
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📍 Prontidão por transportador</h3>
           <p className="text-slate-400 text-xs mb-4">Pendências por área — todas não impeditivas</p>
@@ -290,35 +341,17 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={card + " p-5"}>
             <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">📊 Pontos por Subsistema</h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={phaseData} layout="vertical" margin={{left:8, right:8}}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
-                <XAxis type="number" tick={{fontSize:11}} allowDecimals={false}/><YAxis dataKey="name" type="category" tick={{fontSize:10}} width={92}/>
-                <Tooltip/><Legend iconSize={10} wrapperStyle={{fontSize:11}}/>
-                <Bar dataKey="resolvido" stackId="a" fill="#10b981" name="Resolvido"/>
-                <Bar dataKey="pendente" stackId="a" fill="#f59e0b" name="Pendente"/>
-                <Bar dataKey="falha" stackId="a" fill="#ef4444" name="Falha"/>
-              </BarChart>
-            </ResponsiveContainer>
+            <Bars data={phaseData}/>
           </div>
           <div className={card + " p-5"}>
             <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">⚡ Status dos Pontos</h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie data={statusPie} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({value})=>value} labelLine={false}>
-                  {statusPie.map((e,i)=><Cell key={i} fill={e.color}/>)}
-                </Pie>
-                <Tooltip/><Legend iconSize={10} wrapperStyle={{fontSize:11}}/>
-              </PieChart>
-            </ResponsiveContainer>
+            <StatusPie data={statusPie}/>
           </div>
         </div>
 
-        {/* Aging */}
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">⏱️ Idade das pendências em aberto</h3>
           <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição (28/05) até 08/06 · ordenado do mais antigo</p>
@@ -328,7 +361,7 @@ function Dashboard() {
                 <span className="text-xs font-mono text-slate-400 w-6 text-right">#{p.id}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-700 truncate">{p.desc}{p.est && <span className="text-[10px] text-slate-400 ml-1">(data est.)</span>}</p>
-                  <div className="h-1.5 mt-1 rounded-full bg-slate-200 overflow-hidden"><div className={"h-full rounded-full " + c.bar} style={{width:((p.idade/maxAge)*100)+'%'}}/></div>
+                  <div className="h-1.5 mt-1 rounded-full bg-slate-200 overflow-hidden"><div className={"h-full rounded-full " + c.bar} style={{width:((p.idade/maxAge)*100)+'%'}}></div></div>
                 </div>
                 <span className={"text-sm font-bold whitespace-nowrap " + c.txt}>{p.idade===0?'novo':'≥'+p.idade+'d'}</span>
               </div>
@@ -336,14 +369,12 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Insights */}
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 text-lg flex items-center gap-2">🔍 Leitura do Comissionamento</h3>
-          {!print && <p className="text-slate-400 text-xs mb-4">Clique em um item para expandir</p>}
+          {!print && <p className="text-slate-400 text-xs mb-4">Toque em um item para expandir</p>}
           <div className="space-y-3 mt-3">
             {INSIGHTS.map((ins,i)=>(
-              <div key={i} onClick={()=>!print && setActiveInsight(activeInsight===i?null:i)}
-                className={"border-l-4 rounded-xl p-4 transition-all " + ins.color + (print?'':' cursor-pointer hover:shadow-md')}>
+              <div key={i} onClick={()=>!print && setActiveInsight(activeInsight===i?null:i)} className={"border-l-4 rounded-xl p-4 transition-all " + ins.color + (print?'':' cursor-pointer hover:shadow-md')}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{ins.icon}</span>
@@ -357,7 +388,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Movimentos */}
         <div className={print ? "rounded-2xl border-2 border-cyan-600 p-5" : "bg-gradient-to-r from-cyan-600 to-blue-700 rounded-2xl shadow p-5 text-white"}>
           <h3 className={"font-bold text-lg mb-3 flex items-center gap-2 " + (print?'text-slate-800':'')}>📦 Próximos 3 movimentos</h3>
           <div className="space-y-2">
@@ -376,7 +406,11 @@ function Dashboard() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard/>);
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard/>);
+} catch (err) {
+  document.getElementById('root').innerHTML = '<div style="padding:16px;font-family:monospace;color:#b91c1c;white-space:pre-wrap;font-size:13px">Erro: ' + err.message + '</div>';
+}
 </script>
 </body>
 </html>
