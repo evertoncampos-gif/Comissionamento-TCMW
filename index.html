@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -100,6 +99,18 @@ const buildPhaseData = () => SUBS.map(sub => { const it = POINTS.filter(p => p.s
 const buildStatusPie = () => Object.keys(STATUS_META).map(k => ({ name: STATUS_META[k].name, color: STATUS_META[k].color, value: POINTS.filter(p=>p.status===k).length })).filter(d=>d.value>0);
 const buildAging = () => POINTS.filter(p=>!p.fechado_em).map(p => ({ ...p, idade: daysBetween(parseDate(p.aberto_em), refT) })).sort((a,b)=>b.idade-a.idade);
 const buildTC = () => TC_ORDER.map(tc => { const it = POINTS.filter(p=>p.tc===tc); const open = it.filter(p=>!p.fechado_em); return { tc, total: it.length, resolvido: it.filter(p=>p.status==='resolvido').length, open: open.length, falha: it.filter(p=>p.status==='falha').length, pronto: open.length===0, note: TC_NOTE[tc] }; });
+
+const CHECK = [
+  { cond:'A vazio (descarregada)', total:45, testado:44, andamento:0, pendente:1 },
+  { cond:'Descarregada e carregada', total:3, testado:3, andamento:0, pendente:0 },
+  { cond:'Com carga (carregada)', total:13, testado:0, andamento:13, pendente:0 },
+  { cond:'Não aplicável (N/A)', total:3, na:true },
+];
+const CURVAS = [
+  { titulo:'Volume de água × % de abertura da válvula', sistema:'Bomba Skid' },
+  { titulo:'Taxa de alimentação × frequência da rosca helicoidal', sistema:'Sistema de alimentação' },
+  { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Amostradores TC10-Misturador, Misturador e TC03-TC07' },
+];
 
 const ageColor = (idade, status) => status==='falha'||idade>=6 ? {bar:'bg-red-500',txt:'text-red-600',bg:'bg-red-50'} : idade>=3 ? {bar:'bg-amber-500',txt:'text-amber-600',bg:'bg-amber-50'} : {bar:'bg-slate-400',txt:'text-slate-600',bg:'bg-slate-50'};
 
@@ -229,6 +240,16 @@ function Dashboard() {
         </div>
 
         <div className={card + " p-5"}>
+          <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">📋 Como ler este painel</h3>
+          <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-5">
+            <li><b>Indicadores e gráficos</b> (topo, burndown, status, subsistema, idade das pendências, prontidão por TC): acompanham as <b>31 pendências/ações</b> levantadas em campo durante as inspeções — o "punch list".</li>
+            <li><b>Checklist de comissionamento</b>: o plano de testes — <b>64 ações</b> por sistema e condição (a vazio / com carga). É uma contagem diferente, do plano completo, não das pendências.</li>
+            <li><b>Curvas (P&D)</b>: levantamentos de caracterização pedidos pelo time de P&D, realizados na fase com carga.</li>
+            <li><b>Fase e selo de liberação</b>: a situação geral do comissionamento e se a operação está liberada.</li>
+          </ul>
+        </div>
+
+        <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2">🚀 Fase do comissionamento</h3>
           <div className="flex items-center gap-2">
             <div className="flex-1 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3 text-center">
@@ -277,6 +298,7 @@ function Dashboard() {
           </div>
         </div>
 
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-1">Pendências e ações levantadas · 31 pontos (punch list)</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {KPIS.map((k,i)=> print ? (
             <div key={i} className={"bg-white border-l-4 " + k.bord + " border border-slate-200 rounded-2xl p-4"}>
@@ -295,25 +317,43 @@ function Dashboard() {
         </div>
 
         <div className={card + " p-5"}>
-          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">🚀 Testes com carga (periféricos)</h3>
-          <p className="text-slate-400 text-xs mb-3">Fase iniciada em 08/06 · teste dos periféricos sob fluxo de minério</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              {label:'Periféricos testados', value:'—', sub:'sob carga'},
-              {label:'Válvulas de amostragem', value:'—', sub:'previsto 09/06'},
-              {label:'Chutes / calhas', value:'—', sub:'a programar'},
-              {label:'Válvulas rotativas', value:'—', sub:'a programar'},
-            ].map((m,i)=>(
-              <div key={i} className="rounded-xl border border-slate-200 p-3">
-                <div className="text-2xl font-bold text-slate-800">{m.value}</div>
-                <div className="text-xs text-slate-500 mt-1">{m.label}</div>
-                <div className="text-[11px] text-slate-400">{m.sub}</div>
+          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">✅ Checklist de comissionamento</h3>
+          <p className="text-slate-400 text-xs mb-3">Plano de testes do comissionamento — 64 ações (contagem distinta das 31 pendências acima). A vazio concluído (1 pendência); condição carregada iniciada em 09/06.</p>
+          <div className="space-y-2">
+            {CHECK.map((c,i)=>{
+              const segs=[['testado','#10b981',c.testado||0],['andamento','#0891b2',c.andamento||0],['pendente','#ef4444',c.pendente||0]];
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="w-40 text-[11px] text-slate-600 text-right shrink-0 leading-tight">{c.cond}</div>
+                  <div className="flex-1 flex h-5 rounded overflow-hidden bg-slate-100">
+                    {c.na ? <div className="w-full bg-slate-300 flex items-center justify-center text-[9px] text-slate-700 font-bold">{c.total} · N/A</div>
+                      : segs.map(([k,col,v])=> v>0 ? <div key={k} style={{width:(v/c.total*100)+'%',background:col}} className="flex items-center justify-center text-[9px] text-white font-bold">{v}</div> : null)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-3 justify-center mt-3 flex-wrap">
+            <span className="text-[11px] text-slate-500 flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm" style={{background:'#10b981'}}></span>Testado</span>
+            <span className="text-[11px] text-slate-500 flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm" style={{background:'#0891b2'}}></span>Em andamento</span>
+            <span className="text-[11px] text-slate-500 flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm" style={{background:'#ef4444'}}></span>Pendente</span>
+          </div>
+          <div className="mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
+            <span className="mt-0.5">⚠️</span>
+            <p className="text-xs text-slate-600">Única pendência a vazio: <b>purga do pulmão (ar comprimido)</b>. Todo o restante da condição descarregada foi testado. A condição carregada começou em 09/06.</p>
+          </div>
+        </div>
+
+        <div className={card + " p-5"}>
+          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📈 Curvas solicitadas (P&D)</h3>
+          <p className="text-slate-400 text-xs mb-3">Levantamentos de caracterização pedidos pelo P&D — dependem da fase com carga</p>
+          <div className="space-y-2">
+            {CURVAS.map((c,i)=>(
+              <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-200 p-3">
+                <span className="text-[10px] font-bold text-white bg-slate-400 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">AGUARDANDO</span>
+                <div><p className="text-sm text-slate-700">{c.titulo}</p><p className="text-[11px] text-slate-400">{c.sistema}</p></div>
               </div>
             ))}
-          </div>
-          <div className="mt-3 flex items-start gap-2 bg-cyan-50 border border-cyan-200 rounded-xl p-3">
-            <span className="mt-0.5">📊</span>
-            <p className="text-xs text-slate-600">Painel a preencher conforme os periféricos forem testados com carga. Performance de secagem (umidade, tonelagem) é métrica de <b>operação</b>, após a entrega — fora do escopo do comissionamento.</p>
           </div>
         </div>
 
