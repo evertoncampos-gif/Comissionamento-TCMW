@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Comissionamento TCMW</title>
 <!-- Dashboard de Comissionamento TCMW · arquivo único para GitHub Pages.
-     Sem biblioteca de gráficos: tudo em SVG/CSS. Para atualizar: edite POINTS e REPORTS. -->
+     Sem biblioteca de gráficos: tudo em SVG/CSS. Para atualizar: edite POINTS, REPORTS, CHECK e CURVAS. -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -23,8 +23,8 @@ window.addEventListener('error', function(e){
 const { useState } = React;
 
 // ── FONTE ÚNICA DE VERDADE ──────────────────────────────────────────────
-const REF = '2026-06-08';
-const REPORTS = ['2026-05-28', '2026-05-29', '2026-06-03', '2026-06-08'];
+const REF = '2026-06-10';
+const REPORTS = ['2026-05-28', '2026-05-29', '2026-06-03', '2026-06-08', '2026-06-10'];
 
 const POINTS = [
   {id:1,  desc:"Contatores da TC-10 sem atuação via supervisório (PIW-005/004)", sub:"Elétrica & Automação", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
@@ -58,6 +58,8 @@ const POINTS = [
   {id:29, desc:"Bicos dispersores da TC-10 comissionados", sub:"Utilidades (Ar/Água/Skid)", tc:"TC-10", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
   {id:30, desc:"Alimentação do silo comissionada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
   {id:31, desc:"Válvula helicoidal testada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
+  {id:32, desc:"Câmeras termográficas — 2 de 4 operando (suspeita de alimentação PoE)", sub:"Instrumentação", tc:"Geral", status:"falha", aberto_em:"2026-06-10", fechado_em:null, classe:"tratamento", secagem:true, prazo:"2026-06-22", nota:"diagnóstico individual com a PG em 10/06"},
+  {id:33, desc:"Substituir câmera de processo da sala elétrica da TC-10 (necessita compra)", sub:"Instrumentação", tc:"TC-10", status:"avaliacao", aberto_em:"2026-06-10", fechado_em:null, classe:"melhoria"},
 ];
 
 const SUBS = ["Elétrica & Automação","Instrumentação","Proteções / NR-12","Mecânica & Acionamentos","Utilidades (Ar/Água/Skid)","Processo & Ambiente"];
@@ -72,34 +74,6 @@ const fmtShort = t => new Date(t).toLocaleDateString('pt-BR', { day:'2-digit', m
 const daysBetween = (a, b) => Math.round((b - a) / DAY);
 const refT = parseDate(REF);
 
-const INSIGHTS = [
-  { icon:'🚀', title:'Comissionamento com carga LIBERADO', badge:'MARCO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
-    text:'Teste do skid aprovado em 08/06 — bomba (parte integrante do skid), bicos dispersores da TC-03 e TC-10, alimentação do silo e válvula helicoidal, todos comissionados com sucesso. O sistema está autorizado a subir para a operação com carga. Encerra a etapa a vazio.' },
-  { icon:'📡', title:'Sensor de vazamento de micro-ondas — trava de segurança mitigada', badge:'MITIGADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
-    text:'Único item com peso de segurança real. Enquanto o estudo não conclui, a operação se apoia em distância segura e medição com sensores portáteis. Concluir o estudo remove a dependência do controle interino.' },
-  { icon:'⚡', title:'Falha 80C8 na F-037 (TC-03) — em tratamento, não impeditiva', badge:'EM TRATAMENTO', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
-    text:'Pendência mais antiga (desde 28/05) e única falha eletroeletrônica ativa. Não impede operar com carga, mas convém fechar para não arrastar uma falha ativa em equipamento já em operação.' },
-  { icon:'📈', title:'Da etapa a vazio à carga em 11 dias', badge:'TENDÊNCIA', badgeColor:'bg-cyan-600', color:'border-cyan-400 bg-cyan-50',
-    text:'12 → 8 → 7 abertos nos três primeiros relatórios; em 08/06, 4 pontos de carga comissionados (skid) elevaram os resolvidos para 24. As 7 pendências antigas seguem abertas — todas não impeditivas.' },
-  { icon:'📦', title:'Melhorias com material já em mãos', badge:'CAMINHO LIMPO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
-    text:'Borracha do limitador lateral (TC-03/TC-10) e cabo de aço anti-chicoteamento já recebidos — é só programar a instalação, agora em paralelo à operação com carga.' },
-];
-
-const MOVES = [
-  { tag:'Operação', action:'Acompanhar a primeira campanha de comissionamento com carga — testar os periféricos sob fluxo de minério.' },
-  { tag:'Segurança', action:'Concluir o estudo do sensor de vazamento de micro-ondas; manter distância segura + sensores portáteis até lá.' },
-  { tag:'Em paralelo', action:'Tratar a falha 80C8 (F-037) e instalar borracha do limitador + cabo anti-chicoteamento (material em mãos).' },
-];
-
-function openAt(d){ return POINTS.filter(p => parseDate(p.aberto_em) <= d && (!p.fechado_em || parseDate(p.fechado_em) > d)).length; }
-function resolvedAt(d){ return POINTS.filter(p => p.fechado_em && parseDate(p.fechado_em) <= d).length; }
-function totalAt(d){ return POINTS.filter(p => parseDate(p.aberto_em) <= d).length; }
-const buildBurndown = () => REPORTS.map(r => { const d = parseDate(r); return { label: fmtShort(d), abertos: openAt(d), resolvidos: resolvedAt(d), total: totalAt(d) }; });
-const buildPhaseData = () => SUBS.map(sub => { const it = POINTS.filter(p => p.sub === sub); return { name: SUB_SHORT[sub], resolvido: it.filter(p=>p.status==='resolvido').length, pendente: it.filter(p=>p.status==='avaliacao'||p.status==='material').length, falha: it.filter(p=>p.status==='falha').length }; });
-const buildStatusPie = () => Object.keys(STATUS_META).map(k => ({ name: STATUS_META[k].name, color: STATUS_META[k].color, value: POINTS.filter(p=>p.status===k).length })).filter(d=>d.value>0);
-const buildAging = () => POINTS.filter(p=>!p.fechado_em).map(p => ({ ...p, idade: daysBetween(parseDate(p.aberto_em), refT) })).sort((a,b)=>b.idade-a.idade);
-const buildTC = () => TC_ORDER.map(tc => { const it = POINTS.filter(p=>p.tc===tc); const open = it.filter(p=>!p.fechado_em); return { tc, total: it.length, resolvido: it.filter(p=>p.status==='resolvido').length, open: open.length, falha: it.filter(p=>p.status==='falha').length, pronto: open.length===0, note: TC_NOTE[tc] }; });
-
 const CHECK = [
   { cond:'A vazio (descarregada)', total:45, testado:44, andamento:0, pendente:1 },
   { cond:'Descarregada e carregada', total:3, testado:3, andamento:0, pendente:0 },
@@ -112,9 +86,39 @@ const CURVAS = [
   { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Amostradores TC10-Misturador, Misturador e TC03-TC07' },
 ];
 
+const INSIGHTS = [
+  { icon:'🚀', title:'Comissionamento com carga em andamento', badge:'EM CURSO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
+    text:'Skid aprovado em 08/06 liberou a fase com carga. Em 09/06, as válvulas de amostragem 01/02/03 foram testadas com bom comportamento. A etapa a vazio está concluída (1 pendência: purga do pulmão).' },
+  { icon:'🧪', title:'Válvulas de amostragem: comportamento OK, conclusão pendente', badge:'PARCIAL', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
+    text:'Amostradores 01, 02 e 03 testados em 09/06 e se comportaram bem nas diferentes faixas de umidade. Como o material nas correias ainda está abaixo do nominal, o comissionamento das válvulas só será dado como concluído após o teste com a correia em capacidade máxima.' },
+  { icon:'🎥', title:'Câmeras termográficas: 2 de 4 operando', badge:'DIAGNÓSTICO', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
+    text:'Metade das câmeras termográficas fora do ar; a suspeita é problema na alimentação PoE. Não travam os testes com carga atuais, mas são necessárias para os testes de secagem — há prazo até 22/06 para resolver, com folga. Teste individual com a PG em 10/06 para fechar o diagnóstico. Em paralelo, uma câmera de processo da sala elétrica da TC-10 precisa ser substituída (necessita compra).' },
+  { icon:'📡', title:'Sensor de vazamento de micro-ondas — trava de segurança mitigada', badge:'MITIGADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
+    text:'Único item com peso de segurança real. Enquanto o estudo não conclui, a operação se apoia em distância segura e medição com sensores portáteis. Concluir o estudo remove a dependência do controle interino.' },
+  { icon:'⚡', title:'Falha 80C8 na F-037 (TC-03) — em tratamento, não impeditiva', badge:'EM TRATAMENTO', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
+    text:'Pendência mais antiga (desde 28/05) e falha eletroeletrônica ativa. Não impede operar com carga, mas convém fechar para não arrastar uma falha ativa em equipamento já em operação.' },
+  { icon:'📦', title:'Melhorias com material já em mãos', badge:'CAMINHO LIMPO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
+    text:'Borracha do limitador lateral (TC-03/TC-10) e cabo de aço anti-chicoteamento já recebidos — é só programar a instalação, em paralelo à operação com carga.' },
+];
+
+const MOVES = [
+  { tag:'Instrumentação', action:'Diagnosticar as câmeras termográficas (2 de 4) com a PG hoje (10/06) — confirmar a suspeita de alimentação PoE. Abrir a compra da câmera de processo da TC-10.' },
+  { tag:'Com carga', action:'Concluir o comissionamento das válvulas de amostragem com a correia em capacidade máxima — comportamento já validado em diferentes umidades.' },
+  { tag:'Em paralelo', action:'Seguir tratando a falha 80C8 (F-037) e o estudo do sensor de micro-ondas; instalar borracha do limitador + cabo anti-chicoteamento (material em mãos).' },
+];
+
+function openAt(d){ return POINTS.filter(p => parseDate(p.aberto_em) <= d && (!p.fechado_em || parseDate(p.fechado_em) > d)).length; }
+function resolvedAt(d){ return POINTS.filter(p => p.fechado_em && parseDate(p.fechado_em) <= d).length; }
+function totalAt(d){ return POINTS.filter(p => parseDate(p.aberto_em) <= d).length; }
+const buildBurndown = () => REPORTS.map(r => { const d = parseDate(r); return { label: fmtShort(d), abertos: openAt(d), resolvidos: resolvedAt(d), total: totalAt(d) }; });
+const buildPhaseData = () => SUBS.map(sub => { const it = POINTS.filter(p => p.sub === sub); return { name: SUB_SHORT[sub], resolvido: it.filter(p=>p.status==='resolvido').length, pendente: it.filter(p=>p.status==='avaliacao'||p.status==='material').length, falha: it.filter(p=>p.status==='falha').length }; });
+const buildStatusPie = () => Object.keys(STATUS_META).map(k => ({ name: STATUS_META[k].name, color: STATUS_META[k].color, value: POINTS.filter(p=>p.status===k).length })).filter(d=>d.value>0);
+const buildAging = () => POINTS.filter(p=>!p.fechado_em).map(p => ({ ...p, idade: daysBetween(parseDate(p.aberto_em), refT) })).sort((a,b)=>b.idade-a.idade);
+const buildTC = () => TC_ORDER.map(tc => { const it = POINTS.filter(p=>p.tc===tc); const open = it.filter(p=>!p.fechado_em); return { tc, total: it.length, resolvido: it.filter(p=>p.status==='resolvido').length, open: open.length, falha: it.filter(p=>p.status==='falha').length, pronto: open.length===0, note: TC_NOTE[tc] }; });
+
 const ageColor = (idade, status) => status==='falha'||idade>=6 ? {bar:'bg-red-500',txt:'text-red-600',bg:'bg-red-50'} : idade>=3 ? {bar:'bg-amber-500',txt:'text-amber-600',bg:'bg-amber-50'} : {bar:'bg-slate-400',txt:'text-slate-600',bg:'bg-slate-50'};
 
-// ── GRÁFICOS (SVG/CSS puro, sem biblioteca) ─────────────────────────────
+// ── GRÁFICOS (SVG/CSS puro) ─────────────────────────────────────────────
 function Burndown({data}) {
   const W=320, H=190, padL=24, padB=24, padT=8, padR=8;
   const maxY = Math.max(...data.map(d=>d.total), 1);
@@ -206,7 +210,7 @@ function Dashboard() {
     { label:'Pontos levantados', value:total, sub:'no comissionamento', grad:'from-cyan-500 to-blue-600', bord:'border-cyan-500', icon:'🎯' },
     { label:'Taxa de resolução', value:rate+'%', sub:done+' resolvidos', grad:'from-emerald-500 to-teal-600', bord:'border-emerald-500', icon:'✅' },
     { label:'Em aberto', value:open, sub:'não impeditivas', grad:'from-amber-500 to-orange-500', bord:'border-amber-500', icon:'📈' },
-    { label:'Falhas ativas', value:falhas, sub:'⚠️ 80C8 · em tratamento', grad:'from-red-500 to-rose-600', bord:'border-red-500', icon:'⚠️' },
+    { label:'Falhas ativas', value:falhas, sub:'em tratamento (80C8, câmeras)', grad:'from-red-500 to-rose-600', bord:'border-red-500', icon:'⚠️' },
   ];
 
   return (
@@ -232,7 +236,7 @@ function Dashboard() {
               Comissionamento TCMW
             </h1>
             <p className="text-slate-500 text-sm mt-1">Secagem de minério por micro-ondas · Resp.: Everton da Silva Campos · {total} pontos</p>
-            <p className="text-xs text-slate-400 mt-1">Último marco: 08/06/2026 · histórico desde 28/05</p>
+            <p className="text-xs text-slate-400 mt-1">Última atualização: 10/06/2026 · histórico desde 28/05</p>
           </div>
           <button onClick={()=>setPrint(!print)} className={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all " + (print ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50')}>
             🖨️ {print ? 'Tela' : 'Impressão'}
@@ -242,7 +246,7 @@ function Dashboard() {
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">📋 Como ler este painel</h3>
           <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-5">
-            <li><b>Indicadores e gráficos</b> (topo, burndown, status, subsistema, idade das pendências, prontidão por TC): acompanham as <b>31 pendências/ações</b> levantadas em campo durante as inspeções — o "punch list".</li>
+            <li><b>Indicadores e gráficos</b> (topo, burndown, status, subsistema, idade das pendências, prontidão por TC): acompanham as <b>{total} pendências/ações</b> levantadas em campo durante as inspeções — o "punch list".</li>
             <li><b>Checklist de comissionamento</b>: o plano de testes — <b>64 ações</b> por sistema e condição (a vazio / com carga). É uma contagem diferente, do plano completo, não das pendências.</li>
             <li><b>Curvas (P&D)</b>: levantamentos de caracterização pedidos pelo time de P&D, realizados na fase com carga.</li>
             <li><b>Fase e selo de liberação</b>: a situação geral do comissionamento e se a operação está liberada.</li>
@@ -257,18 +261,49 @@ function Dashboard() {
               <div className="text-2xl my-0.5">✅</div>
               <div className="text-[11px] text-slate-500">concluído</div>
             </div>
-            <div className="text-2xl text-slate-300 font-bold">▶</div>
+            <div className="text-xl text-slate-300 font-bold">▶</div>
             <div className="flex-1 rounded-xl border-2 border-cyan-400 bg-cyan-50 p-3 text-center">
               <div className="text-xs font-bold text-cyan-700 uppercase tracking-wide">Com carga</div>
               <div className="text-2xl my-0.5">🚀</div>
-              <div className="text-[11px] text-slate-500">liberado · 08/06</div>
+              <div className="text-[11px] text-slate-500">em andamento</div>
+            </div>
+            <div className="text-xl text-slate-300 font-bold">▶</div>
+            <div className="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-3 text-center">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wide">Secagem</div>
+              <div className="text-2xl my-0.5">🔥</div>
+              <div className="text-[11px] text-slate-500">próxima fase</div>
             </div>
           </div>
           <div className="mt-3 flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
             <span className="mt-0.5">✅</span>
-            <p className="text-xs text-slate-600">Gate <b>APROVADO (08/06)</b>: teste do skid — bomba, bicos dispersores TC-03/TC-10, alimentação do silo e válvula helicoidal. Sistema liberado para comissionamento com carga; melhorias seguem em paralelo.</p>
+            <p className="text-xs text-slate-600">Gate <b>APROVADO (08/06)</b>: teste do skid — bomba, bicos dispersores TC-03/TC-10, alimentação do silo e válvula helicoidal. Fase com carga em curso; conclusão das válvulas de amostragem condicionada a teste com a correia em capacidade máxima.</p>
           </div>
         </div>
+
+        {(() => {
+          const reqs = POINTS.filter(p=>p.secagem && !p.fechado_em);
+          if (!reqs.length) return null;
+          return (
+            <div className={card + " p-5"}>
+              <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">🔥 Pré-requisitos da fase de secagem</h3>
+              <p className="text-slate-400 text-xs mb-3">Não travam os testes com carga atuais, mas precisam estar prontos para os testes de secagem</p>
+              <div className="space-y-2">
+                {reqs.map(p=>{
+                  const dias = daysBetween(refT, parseDate(p.prazo));
+                  return (
+                    <div key={p.id} className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 p-3">
+                      <span className="text-[10px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">NEC. SECAGEM</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-700">#{p.id} {p.desc}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Prazo: <b>até {fmtShort(parseDate(p.prazo))}</b> · {dias<0 ? 'VENCIDO há '+(-dias)+' dias' : 'faltam '+dias+' dias'}{p.nota ? ' · '+p.nota : ''}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         <div className={"rounded-2xl p-5 border-2 " + (liberavel ? 'border-emerald-400 bg-emerald-50' : 'border-amber-400 bg-amber-50')}>
           <div className="flex items-start gap-3">
@@ -278,7 +313,7 @@ function Dashboard() {
                 <span className="font-bold text-slate-800 text-lg">{liberavel ? 'Operação liberável' : 'Liberação CONDICIONADA'}</span>
                 <span className={"text-xs font-bold text-white px-2 py-0.5 rounded-full " + (liberavel?'bg-emerald-500':'bg-amber-500')}>{impeditivos.length} impeditivo{impeditivos.length!==1?'s':''}</span>
               </div>
-              <p className="text-sm text-slate-700 mt-1">Nenhuma pendência impede a operação. As {openPts.length} em aberto são: 1 item de segurança mitigado, 1 falha em tratamento e {melhorias.length} melhorias.</p>
+              <p className="text-sm text-slate-700 mt-1">Nenhuma pendência impede a operação. As {openPts.length} em aberto: {mitigados.length} de segurança (mitigada), {tratamento.length} falhas em tratamento e {melhorias.length} melhorias.</p>
               <div className="mt-3 space-y-1.5">
                 {mitigados.map(m=>(
                   <div key={m.id} className="flex items-start gap-2 bg-white border border-blue-200 rounded-lg p-2">
@@ -289,7 +324,7 @@ function Dashboard() {
                 {tratamento.map(t=>(
                   <div key={t.id} className="flex items-start gap-2 bg-white border border-amber-200 rounded-lg p-2">
                     <span className="text-[10px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">EM TRATAMENTO</span>
-                    <span className="text-xs text-slate-700">#{t.id} {t.desc} — falha ativa, não impeditiva</span>
+                    <span className="text-xs text-slate-700">#{t.id} {t.desc}{t.nota ? ' — '+t.nota : ' — falha ativa, não impeditiva'}</span>
                   </div>
                 ))}
                 <div className="text-xs text-slate-500 pl-1">+ {melhorias.length} melhorias (não impeditivas)</div>
@@ -298,7 +333,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-1">Pendências e ações levantadas · 31 pontos (punch list)</p>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-1">Pendências e ações levantadas · {total} pontos (punch list)</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {KPIS.map((k,i)=> print ? (
             <div key={i} className={"bg-white border-l-4 " + k.bord + " border border-slate-200 rounded-2xl p-4"}>
@@ -318,7 +353,7 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">✅ Checklist de comissionamento</h3>
-          <p className="text-slate-400 text-xs mb-3">Plano de testes do comissionamento — 64 ações (contagem distinta das 31 pendências acima). A vazio concluído (1 pendência); condição carregada iniciada em 09/06.</p>
+          <p className="text-slate-400 text-xs mb-3">Plano de testes do comissionamento — 64 ações (contagem distinta dos {total} pontos do punch list). A vazio concluído (1 pendência); condição carregada em andamento desde 09/06.</p>
           <div className="space-y-2">
             {CHECK.map((c,i)=>{
               const segs=[['testado','#10b981',c.testado||0],['andamento','#0891b2',c.andamento||0],['pendente','#ef4444',c.pendente||0]];
@@ -340,7 +375,11 @@ function Dashboard() {
           </div>
           <div className="mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
             <span className="mt-0.5">⚠️</span>
-            <p className="text-xs text-slate-600">Única pendência a vazio: <b>purga do pulmão (ar comprimido)</b>. Todo o restante da condição descarregada foi testado. A condição carregada começou em 09/06.</p>
+            <p className="text-xs text-slate-600">Única pendência a vazio: <b>purga do pulmão (ar comprimido)</b>. Todo o restante da condição descarregada foi testado.</p>
+          </div>
+          <div className="mt-2 flex items-start gap-2 bg-cyan-50 border border-cyan-200 rounded-xl p-3">
+            <span className="mt-0.5">🧪</span>
+            <p className="text-xs text-slate-600">Carga em andamento: válvulas de amostragem 01/02/03 testadas (09/06) com bom comportamento em diferentes umidades. Conclusão condicionada a teste com a correia em <b>capacidade máxima</b> (material hoje abaixo do nominal).</p>
           </div>
         </div>
 
@@ -358,14 +397,14 @@ function Dashboard() {
         </div>
 
         <div className={card + " p-5"}>
-          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📉 Burndown · evolução por relatório</h3>
-          <p className="text-slate-400 text-xs mb-3">28/05 · 29/05 · 03/06 · 08/06 (teste do skid)</p>
+          <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📉 Burndown · pendências por relatório</h3>
+          <p className="text-slate-400 text-xs mb-3">28/05 · 29/05 · 03/06 · 08/06 · 10/06 — acompanha os {total} pontos do punch list</p>
           <Burndown data={burndown}/>
         </div>
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📍 Prontidão por transportador</h3>
-          <p className="text-slate-400 text-xs mb-4">Pendências por área — todas não impeditivas</p>
+          <p className="text-slate-400 text-xs mb-4">Pendências por área (punch list) — todas não impeditivas</p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {tcData.map(t=>(
               <div key={t.tc} className={"rounded-xl p-3 border-2 " + (t.pronto ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50')}>
@@ -383,18 +422,20 @@ function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={card + " p-5"}>
-            <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">📊 Pontos por Subsistema</h3>
+            <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📊 Pendências por Subsistema</h3>
+            <p className="text-slate-400 text-xs mb-4">Distribuição dos {total} pontos do punch list</p>
             <Bars data={phaseData}/>
           </div>
           <div className={card + " p-5"}>
-            <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">⚡ Status dos Pontos</h3>
+            <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">⚡ Status dos pontos</h3>
+            <p className="text-slate-400 text-xs mb-4">Situação dos {total} pontos do punch list</p>
             <StatusPie data={statusPie}/>
           </div>
         </div>
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">⏱️ Idade das pendências em aberto</h3>
-          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição (28/05) até 08/06 · ordenado do mais antigo</p>
+          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição (28/05) até 10/06 · ordenado do mais antigo</p>
           <div className="space-y-2">
             {aging.map(p=>{ const c=ageColor(p.idade,p.status); return (
               <div key={p.id} className={"flex items-center gap-3 rounded-xl p-2.5 " + c.bg}>
@@ -440,7 +481,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 pb-2">Relatórios de 28/05, 29/05, 03/06 e teste do skid em 08/06/2026 · classificação de TC/subsistema sujeita a revisão</p>
+        <p className="text-center text-xs text-slate-400 pb-2">Relatórios de 28/05, 29/05, 03/06, 08/06 e atualização de 10/06/2026 · classificação de TC/subsistema sujeita a revisão</p>
       </div>
     </div>
   );
