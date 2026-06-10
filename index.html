@@ -24,33 +24,33 @@ const { useState } = React;
 
 // ── FONTE ÚNICA DE VERDADE ──────────────────────────────────────────────
 const REF = '2026-06-10';
-const REPORTS = ['2026-05-28', '2026-05-29', '2026-06-03', '2026-06-08', '2026-06-10'];
+const REPORTS = ['2026-05-18','2026-05-21','2026-05-22','2026-05-25','2026-05-28','2026-05-29','2026-06-03','2026-06-08','2026-06-10'];
 
 const POINTS = [
-  {id:1,  desc:"Contatores da TC-10 sem atuação via supervisório (PIW-005/004)", sub:"Elétrica & Automação", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:2,  desc:"Câmera da TC-07 fora de posição, sem fixação", sub:"Instrumentação", tc:"TC-07", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:3,  desc:"Válvula do exaustor da TC-10 sem alavanca de operação", sub:"Mecânica & Acionamentos", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:4,  desc:"Proteção lateral da correia da TC-10 solta", sub:"Proteções / NR-12", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:5,  desc:"Proteções de grade da TC-07 sem fixação", sub:"Proteções / NR-12", tc:"TC-07", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:6,  desc:"Martelos dos motovibradores com necessidade de ajuste", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:7,  desc:"Tampa do misturador travada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:8,  desc:"Sensor de posicionamento do amostrador 02 sem fixação", sub:"Instrumentação", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:9,  desc:"Válvula do skid com vazão divergente", sub:"Utilidades (Ar/Água/Skid)", tc:"Skid", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:10, desc:"Transportador de rosca não aciona", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
+  {id:1,  desc:"Contatores da TC-10 sem atuação via supervisório (PIW-005/004)", sub:"Elétrica & Automação", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:2,  desc:"Câmera da TC-07 fora de posição, sem fixação", sub:"Instrumentação", tc:"TC-07", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:3,  desc:"Válvula do exaustor da TC-10 sem alavanca de operação", sub:"Mecânica & Acionamentos", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:4,  desc:"Proteção lateral da correia da TC-10 inadequada", sub:"Proteções / NR-12", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:5,  desc:"Proteções de grade da TC-07 sem fixação por parafusos", sub:"Proteções / NR-12", tc:"TC-07", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:6,  desc:"Ajustes nos martelos dos motovibradores", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:7,  desc:"Tampa do misturador travada (Tampa 01)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-21", fechado_em:"2026-05-28", est:true},
+  {id:8,  desc:"Sensor de posicionamento da válvula de amostragem 02 sem fixação", sub:"Instrumentação", tc:"Geral", status:"resolvido", aberto_em:"2026-05-21", fechado_em:"2026-05-28", est:true},
+  {id:9,  desc:"Válvula do skid com vazão divergente (~350 L/min)", sub:"Utilidades (Ar/Água/Skid)", tc:"Skid", status:"resolvido", aberto_em:"2026-05-21", fechado_em:"2026-05-28", est:true},
+  {id:10, desc:"Rosca transportadora não aciona", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-22", fechado_em:"2026-05-28", est:true},
   {id:11, desc:"Limpeza das teias de aranha", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-28"},
-  {id:12, desc:"Linha de ar do amostrador 01 retirada", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-29"},
-  {id:13, desc:"Adicionar óleo lubrifil nas linhas de ar", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-29"},
+  {id:12, desc:"Linha de ar da válvula de amostragem 01 retirada", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-21", fechado_em:"2026-05-29"},
+  {id:13, desc:"Adicionar óleo lubrifil nas linhas de ar (reservatórios vazios)", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-22", fechado_em:"2026-05-29"},
   {id:14, desc:"Fixar proteção próxima à válvula de limpeza", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-29"},
   {id:15, desc:"Fixar tubulação de água próxima à válvula de limpeza", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-05-29"},
   {id:16, desc:"Ajuste de altura do nivelador de camada da TC-03", sub:"Mecânica & Acionamentos", tc:"TC-03", status:"resolvido", aberto_em:"2026-06-03", fechado_em:"2026-06-03", est:true},
-  {id:17, desc:"Motor da bomba do skid subdimensionado (nova bomba instalada)", sub:"Utilidades (Ar/Água/Skid)", tc:"Skid", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-06-03", est:true},
+  {id:17, desc:"Bomba do skid subdimensionada (nova bomba instalada)", sub:"Utilidades (Ar/Água/Skid)", tc:"Skid", status:"resolvido", aberto_em:"2026-05-22", fechado_em:"2026-06-03", est:true},
   {id:18, desc:"Ajustes na câmera termográfica", sub:"Instrumentação", tc:"Geral", status:"resolvido", aberto_em:"2026-06-03", fechado_em:"2026-06-03", est:true},
-  {id:19, desc:"Recorte na proteção do motor da válvula rotativa", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-06-03", fechado_em:"2026-06-03", est:true},
+  {id:19, desc:"Recorte na grade de proteção do motor da rosca transportadora (partes cortantes)", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-06-03", est:true},
   {id:20, desc:"Portão de intertravamento 01 não está fechando", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-05-28", fechado_em:"2026-06-03", est:true},
-  {id:21, desc:"Fonte F-037 na TC-03 em falha (Falha 80C8)", sub:"Elétrica & Automação", tc:"TC-03", status:"falha", aberto_em:"2026-05-28", fechado_em:null, classe:"tratamento"},
-  {id:22, desc:"Sensor de vazamento por micro-ondas — necessita avaliação", sub:"Instrumentação", tc:"Geral", status:"avaliacao", aberto_em:"2026-05-28", fechado_em:null, classe:"mitigado", nota:"controles compensatórios: distância segura + sensores portáteis; estudo em andamento"},
-  {id:23, desc:"Condição geral dos mancais sem lubrificação adequada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"avaliacao", aberto_em:"2026-05-28", fechado_em:null, classe:"melhoria"},
-  {id:24, desc:"Pendências da câmara de processo da TC-10", sub:"Processo & Ambiente", tc:"TC-10", status:"avaliacao", aberto_em:"2026-05-28", fechado_em:null, classe:"melhoria"},
+  {id:21, desc:"Fonte F-037 na TC-03 em falha (Falha 80C8)", sub:"Elétrica & Automação", tc:"TC-03", status:"falha", aberto_em:"2026-05-18", fechado_em:null, classe:"tratamento"},
+  {id:22, desc:"Sensor de vazamento por micro-ondas — necessita avaliação", sub:"Instrumentação", tc:"Geral", status:"avaliacao", aberto_em:"2026-05-18", fechado_em:null, classe:"mitigado", nota:"controles compensatórios: distância segura + sensores portáteis; estudo em andamento"},
+  {id:23, desc:"Condição geral dos mancais sem lubrificação adequada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"avaliacao", aberto_em:"2026-05-18", fechado_em:null, classe:"melhoria"},
+  {id:24, desc:"Pendências da câmara de processo da TC-10", sub:"Processo & Ambiente", tc:"TC-10", status:"avaliacao", aberto_em:"2026-05-18", fechado_em:null, classe:"melhoria"},
   {id:25, desc:"Substituir borracha do limitador lateral TC-03/TC-10 (material recebido)", sub:"Mecânica & Acionamentos", tc:"TC-10", status:"material", aberto_em:"2026-05-28", fechado_em:null, classe:"melhoria"},
   {id:26, desc:"Instalar cabo de aço anti-chicoteamento (material recebido)", sub:"Proteções / NR-12", tc:"Geral", status:"material", aberto_em:"2026-06-03", fechado_em:null, est:true, classe:"melhoria"},
   {id:27, desc:"Mau cheiro da ETE entrando na cabine pelo ar-condicionado", sub:"Processo & Ambiente", tc:"Geral", status:"avaliacao", aberto_em:"2026-05-28", fechado_em:null, classe:"melhoria"},
@@ -58,8 +58,12 @@ const POINTS = [
   {id:29, desc:"Bicos dispersores da TC-10 comissionados", sub:"Utilidades (Ar/Água/Skid)", tc:"TC-10", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
   {id:30, desc:"Alimentação do silo comissionada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
   {id:31, desc:"Válvula helicoidal testada", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-08", fechado_em:"2026-06-08"},
-  {id:32, desc:"Câmeras termográficas — 2 de 4 operando (suspeita de alimentação PoE)", sub:"Instrumentação", tc:"Geral", status:"falha", aberto_em:"2026-06-10", fechado_em:null, classe:"tratamento", secagem:true, prazo:"2026-06-22", nota:"diagnóstico individual com a PG em 10/06"},
+  {id:32, desc:"Câmeras termográficas — 2 de 4 operando (suspeita de alimentação PoE)", sub:"Instrumentação", tc:"Geral", status:"falha", aberto_em:"2026-06-10", fechado_em:null, classe:"tratamento", secagem:true, prazo:"2026-06-22", reincidente:true, nota:"1ª ocorrência ~22/05 (resolvida) e retornou; diagnóstico com a PG em 10/06"},
   {id:33, desc:"Substituir câmera de processo da sala elétrica da TC-10 (necessita compra)", sub:"Instrumentação", tc:"TC-10", status:"avaliacao", aberto_em:"2026-06-10", fechado_em:null, classe:"melhoria"},
+  {id:34, desc:"Botão na IHM para acionamento da guilhotina — validação de uso", sub:"Elétrica & Automação", tc:"Geral", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:35, desc:"Sensor de temperatura junto ao nivelador da TC-10 sem utilização", sub:"Instrumentação", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-28", est:true},
+  {id:36, desc:"Partida brusca do motor do exaustor — inversor fora de faixa (substituído e programado em 21/05)", sub:"Elétrica & Automação", tc:"TC-10", status:"resolvido", aberto_em:"2026-05-18", fechado_em:"2026-05-21"},
+  {id:37, desc:"Linha de ar da válvula de amostragem 03 danificada", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"resolvido", aberto_em:"2026-05-21", fechado_em:"2026-05-29", est:true},
 ];
 
 const SUBS = ["Elétrica & Automação","Instrumentação","Proteções / NR-12","Mecânica & Acionamentos","Utilidades (Ar/Água/Skid)","Processo & Ambiente"];
@@ -83,26 +87,26 @@ const CHECK = [
 const CURVAS = [
   { titulo:'Volume de água × % de abertura da válvula', sistema:'Bomba Skid' },
   { titulo:'Taxa de alimentação × frequência da rosca helicoidal', sistema:'Sistema de alimentação' },
-  { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Amostradores TC10-Misturador, Misturador e TC03-TC07' },
+  { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Válvulas de amostragem TC10-Misturador, Misturador e TC03-TC07' },
 ];
 
 const INSIGHTS = [
   { icon:'🚀', title:'Comissionamento com carga em andamento', badge:'EM CURSO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
-    text:'Skid aprovado em 08/06 liberou a fase com carga. Em 09/06, as válvulas de amostragem 01/02/03 foram testadas com bom comportamento. A etapa a vazio está concluída (1 pendência: purga do pulmão).' },
+    text:'Skid aprovado em 08/06 liberou a fase com carga. Em 09/06, as válvulas de amostragem 01/02/03 foram testadas com bom comportamento. A etapa a vazio está concluída (1 pendência: purga do pulmão). Histórico desde 18/05.' },
   { icon:'🧪', title:'Válvulas de amostragem: comportamento OK, conclusão pendente', badge:'PARCIAL', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
-    text:'Amostradores 01, 02 e 03 testados em 09/06 e se comportaram bem nas diferentes faixas de umidade. Como o material nas correias ainda está abaixo do nominal, o comissionamento das válvulas só será dado como concluído após o teste com a correia em capacidade máxima.' },
-  { icon:'🎥', title:'Câmeras termográficas: 2 de 4 operando', badge:'DIAGNÓSTICO', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
-    text:'Metade das câmeras termográficas fora do ar; a suspeita é problema na alimentação PoE. Não travam os testes com carga atuais, mas são necessárias para os testes de secagem — há prazo até 22/06 para resolver, com folga. Teste individual com a PG em 10/06 para fechar o diagnóstico. Em paralelo, uma câmera de processo da sala elétrica da TC-10 precisa ser substituída (necessita compra).' },
+    text:'Válvulas de amostragem 01, 02 e 03 testadas em 09/06 e se comportaram bem nas diferentes faixas de umidade. Como o material nas correias ainda está abaixo do nominal, o comissionamento das válvulas só será dado como concluído após o teste com a correia em capacidade máxima.' },
+  { icon:'🎥', title:'Câmeras termográficas: 2 de 4 — falha REINCIDENTE', badge:'REINCIDENTE', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
+    text:'Já havia ocorrido em ~22/05 (perda de comunicação), foi resolvido e voltou a ocorrer agora — sinal de que a causa-raiz não foi eliminada, reforçando a suspeita de alimentação PoE. Não trava os testes com carga atuais, mas é necessária para os testes de secagem: há prazo até 22/06, com folga. Diagnóstico individual com a PG em 10/06. Em paralelo, uma câmera de processo da sala elétrica da TC-10 precisa ser substituída (necessita compra).' },
   { icon:'📡', title:'Sensor de vazamento de micro-ondas — trava de segurança mitigada', badge:'MITIGADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Único item com peso de segurança real. Enquanto o estudo não conclui, a operação se apoia em distância segura e medição com sensores portáteis. Concluir o estudo remove a dependência do controle interino.' },
   { icon:'⚡', title:'Falha 80C8 na F-037 (TC-03) — em tratamento, não impeditiva', badge:'EM TRATAMENTO', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
-    text:'Pendência mais antiga (desde 28/05) e falha eletroeletrônica ativa. Não impede operar com carga, mas convém fechar para não arrastar uma falha ativa em equipamento já em operação.' },
+    text:'Pendência mais antiga (desde 18/05) e falha eletroeletrônica ativa. Não impede operar com carga, mas convém fechar para não arrastar uma falha ativa em equipamento já em operação.' },
   { icon:'📦', title:'Melhorias com material já em mãos', badge:'CAMINHO LIMPO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Borracha do limitador lateral (TC-03/TC-10) e cabo de aço anti-chicoteamento já recebidos — é só programar a instalação, em paralelo à operação com carga.' },
 ];
 
 const MOVES = [
-  { tag:'Instrumentação', action:'Diagnosticar as câmeras termográficas (2 de 4) com a PG hoje (10/06) — confirmar a suspeita de alimentação PoE. Abrir a compra da câmera de processo da TC-10.' },
+  { tag:'Instrumentação', action:'Diagnosticar as câmeras termográficas (2 de 4, falha reincidente) com a PG hoje (10/06) — atacar a causa-raiz da alimentação PoE para não reincidir de novo. Abrir a compra da câmera de processo da TC-10.' },
   { tag:'Com carga', action:'Concluir o comissionamento das válvulas de amostragem com a correia em capacidade máxima — comportamento já validado em diferentes umidades.' },
   { tag:'Em paralelo', action:'Seguir tratando a falha 80C8 (F-037) e o estudo do sensor de micro-ondas; instalar borracha do limitador + cabo anti-chicoteamento (material em mãos).' },
 ];
@@ -116,7 +120,7 @@ const buildStatusPie = () => Object.keys(STATUS_META).map(k => ({ name: STATUS_M
 const buildAging = () => POINTS.filter(p=>!p.fechado_em).map(p => ({ ...p, idade: daysBetween(parseDate(p.aberto_em), refT) })).sort((a,b)=>b.idade-a.idade);
 const buildTC = () => TC_ORDER.map(tc => { const it = POINTS.filter(p=>p.tc===tc); const open = it.filter(p=>!p.fechado_em); return { tc, total: it.length, resolvido: it.filter(p=>p.status==='resolvido').length, open: open.length, falha: it.filter(p=>p.status==='falha').length, pronto: open.length===0, note: TC_NOTE[tc] }; });
 
-const ageColor = (idade, status) => status==='falha'||idade>=6 ? {bar:'bg-red-500',txt:'text-red-600',bg:'bg-red-50'} : idade>=3 ? {bar:'bg-amber-500',txt:'text-amber-600',bg:'bg-amber-50'} : {bar:'bg-slate-400',txt:'text-slate-600',bg:'bg-slate-50'};
+const ageColor = (idade, status) => status==='falha'||idade>=10 ? {bar:'bg-red-500',txt:'text-red-600',bg:'bg-red-50'} : idade>=4 ? {bar:'bg-amber-500',txt:'text-amber-600',bg:'bg-amber-50'} : {bar:'bg-slate-400',txt:'text-slate-600',bg:'bg-slate-50'};
 
 // ── GRÁFICOS (SVG/CSS puro) ─────────────────────────────────────────────
 function Burndown({data}) {
@@ -126,7 +130,7 @@ function Burndown({data}) {
   const x = i => padL + (n<=1 ? 0 : i*(W-padL-padR)/(n-1));
   const y = v => H-padB - (v/maxY*(H-padB-padT));
   const poly = (key,color,dash) => <polyline points={data.map((d,i)=>x(i)+','+y(d[key])).join(' ')} fill="none" stroke={color} strokeWidth="2.5" strokeDasharray={dash||''} strokeLinejoin="round"/>;
-  const dots = (key,color) => data.map((d,i)=><circle key={key+i} cx={x(i)} cy={y(d[key])} r="3.5" fill={color}/>);
+  const dots = (key,color) => data.map((d,i)=><circle key={key+i} cx={x(i)} cy={y(d[key])} r="3" fill={color}/>);
   const grid = [0,0.5,1].map((f,i)=>{ const yy=H-padB-(f*(H-padB-padT)); return <g key={i}><line x1={padL} y1={yy} x2={W-padR} y2={yy} stroke="#eef2f7"/><text x="0" y={yy+3} fontSize="8" fill="#94a3b8">{Math.round(f*maxY)}</text></g>; });
   const legend = [['Levantados','#cbd5e1'],['Resolvidos','#10b981'],['Em aberto','#0891b2']];
   return (
@@ -137,7 +141,7 @@ function Burndown({data}) {
         {poly('resolvidos','#10b981')}
         {poly('abertos','#0891b2')}
         {dots('total','#cbd5e1')}{dots('resolvidos','#10b981')}{dots('abertos','#0891b2')}
-        {data.map((d,i)=><text key={i} x={x(i)} y={H-padB+14} fontSize="9" fill="#64748b" textAnchor="middle">{d.label}</text>)}
+        {data.map((d,i)=><text key={i} x={x(i)} y={H-padB+14} fontSize="8" fill="#64748b" textAnchor="middle">{d.label}</text>)}
       </svg>
       <div className="flex gap-3 justify-center mt-1 flex-wrap">
         {legend.map(([l,c])=><span key={l} className="text-[11px] text-slate-500 flex items-center gap-1"><span className="inline-block w-3 h-1.5 rounded" style={{background:c}}></span>{l}</span>)}
@@ -236,7 +240,7 @@ function Dashboard() {
               Comissionamento TCMW
             </h1>
             <p className="text-slate-500 text-sm mt-1">Secagem de minério por micro-ondas · Resp.: Everton da Silva Campos · {total} pontos</p>
-            <p className="text-xs text-slate-400 mt-1">Última atualização: 10/06/2026 · histórico desde 28/05</p>
+            <p className="text-xs text-slate-400 mt-1">Última atualização: 10/06/2026 · comissionamento iniciado em 18/05</p>
           </div>
           <button onClick={()=>setPrint(!print)} className={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all " + (print ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50')}>
             🖨️ {print ? 'Tela' : 'Impressão'}
@@ -246,7 +250,7 @@ function Dashboard() {
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">📋 Como ler este painel</h3>
           <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-5">
-            <li><b>Indicadores e gráficos</b> (topo, burndown, status, subsistema, idade das pendências, prontidão por TC): acompanham as <b>{total} pendências/ações</b> levantadas em campo durante as inspeções — o "punch list".</li>
+            <li><b>Indicadores e gráficos</b> (topo, burndown, status, subsistema, idade das pendências, prontidão por TC): acompanham as <b>{total} pendências/ações</b> levantadas em campo desde 18/05 — o "punch list".</li>
             <li><b>Checklist de comissionamento</b>: o plano de testes — <b>64 ações</b> por sistema e condição (a vazio / com carga). É uma contagem diferente, do plano completo, não das pendências.</li>
             <li><b>Curvas (P&D)</b>: levantamentos de caracterização pedidos pelo time de P&D, realizados na fase com carga.</li>
             <li><b>Fase e selo de liberação</b>: a situação geral do comissionamento e se a operação está liberada.</li>
@@ -292,7 +296,10 @@ function Dashboard() {
                   const dias = daysBetween(refT, parseDate(p.prazo));
                   return (
                     <div key={p.id} className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 p-3">
-                      <span className="text-[10px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">NEC. SECAGEM</span>
+                      <div className="flex flex-col gap-1 shrink-0">
+                        <span className="text-[10px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full whitespace-nowrap text-center">NEC. SECAGEM</span>
+                        {p.reincidente && <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full whitespace-nowrap text-center">REINCIDENTE</span>}
+                      </div>
                       <div className="flex-1">
                         <p className="text-sm text-slate-700">#{p.id} {p.desc}</p>
                         <p className="text-[11px] text-slate-500 mt-0.5">Prazo: <b>até {fmtShort(parseDate(p.prazo))}</b> · {dias<0 ? 'VENCIDO há '+(-dias)+' dias' : 'faltam '+dias+' dias'}{p.nota ? ' · '+p.nota : ''}</p>
@@ -324,7 +331,7 @@ function Dashboard() {
                 {tratamento.map(t=>(
                   <div key={t.id} className="flex items-start gap-2 bg-white border border-amber-200 rounded-lg p-2">
                     <span className="text-[10px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">EM TRATAMENTO</span>
-                    <span className="text-xs text-slate-700">#{t.id} {t.desc}{t.nota ? ' — '+t.nota : ' — falha ativa, não impeditiva'}</span>
+                    <span className="text-xs text-slate-700">#{t.id} {t.desc}{t.reincidente ? ' — reincidente' : ''}{t.nota ? ' — '+t.nota : ''}</span>
                   </div>
                 ))}
                 <div className="text-xs text-slate-500 pl-1">+ {melhorias.length} melhorias (não impeditivas)</div>
@@ -398,7 +405,7 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📉 Burndown · pendências por relatório</h3>
-          <p className="text-slate-400 text-xs mb-3">28/05 · 29/05 · 03/06 · 08/06 · 10/06 — acompanha os {total} pontos do punch list</p>
+          <p className="text-slate-400 text-xs mb-3">Histórico cumulativo desde 18/05 · {total} pontos. Nota: as colunas 28/05 e 29/05 contam tudo cumulativamente e podem diferir dos PDFs daqueles dias (que abreviavam itens já resolvidos).</p>
           <Burndown data={burndown}/>
         </div>
 
@@ -435,16 +442,16 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">⏱️ Idade das pendências em aberto</h3>
-          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição (28/05) até 10/06 · ordenado do mais antigo</p>
+          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição até 10/06 · ordenado do mais antigo</p>
           <div className="space-y-2">
             {aging.map(p=>{ const c=ageColor(p.idade,p.status); return (
               <div key={p.id} className={"flex items-center gap-3 rounded-xl p-2.5 " + c.bg}>
                 <span className="text-xs font-mono text-slate-400 w-6 text-right">#{p.id}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700 truncate">{p.desc}{p.est && <span className="text-[10px] text-slate-400 ml-1">(data est.)</span>}</p>
+                  <p className="text-sm text-slate-700 truncate">{p.desc}{p.reincidente && <span className="text-[10px] text-red-500 font-bold ml-1">(reincidente)</span>}{p.est && <span className="text-[10px] text-slate-400 ml-1">(data est.)</span>}</p>
                   <div className="h-1.5 mt-1 rounded-full bg-slate-200 overflow-hidden"><div className={"h-full rounded-full " + c.bar} style={{width:((p.idade/maxAge)*100)+'%'}}></div></div>
                 </div>
-                <span className={"text-sm font-bold whitespace-nowrap " + c.txt}>{p.idade===0?'novo':'≥'+p.idade+'d'}</span>
+                <span className={"text-sm font-bold whitespace-nowrap " + c.txt}>{p.idade===0?'novo':p.idade+'d'}</span>
               </div>
             );})}
           </div>
@@ -481,7 +488,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 pb-2">Relatórios de 28/05, 29/05, 03/06, 08/06 e atualização de 10/06/2026 · classificação de TC/subsistema sujeita a revisão</p>
+        <p className="text-center text-xs text-slate-400 pb-2">Comissionamento iniciado em 18/05/2026 · relatórios de 18, 21, 22, 25, 28, 29/05, 03, 08 e 10/06 · classificação de TC/subsistema sujeita a revisão</p>
       </div>
     </div>
   );
