@@ -23,8 +23,8 @@ window.addEventListener('error', function(e){
 const { useState } = React;
 
 // ── FONTE ÚNICA DE VERDADE ──────────────────────────────────────────────
-const REF = '2026-06-15';
-const REPORTS = ['2026-05-18','2026-05-21','2026-05-22','2026-05-25','2026-05-28','2026-05-29','2026-06-03','2026-06-08','2026-06-10','2026-06-15'];
+const REF = '2026-06-18';
+const REPORTS = ['2026-05-18','2026-05-21','2026-05-22','2026-05-25','2026-05-28','2026-05-29','2026-06-03','2026-06-08','2026-06-10','2026-06-15','2026-06-17','2026-06-18'];
 
 const POINTS = [
   // Levantamento inicial (18/05)
@@ -72,8 +72,15 @@ const POINTS = [
   {id:37, desc:"Substituir câmera de processo da sala elétrica da TC-10 (necessita compra)", sub:"Instrumentação", tc:"TC-10", status:"avaliacao", aberto_em:"2026-06-10", fechado_em:null, classe:"melhoria"},
   // 15/06
   {id:38, desc:"Gotejamento residual dos bicos dispersores após desligamento (escoa e depois pinga por tempo prolongado)", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"avaliacao", aberto_em:"2026-06-15", fechado_em:null, classe:"melhoria", nota:"relevante para a análise de dados de secagem — pode adicionar umidade e distorcer a eficiência (TC-03 e TC-10)"},
-  {id:39, desc:"Purga do pulmão de ar comprimido: válvula solenoide e temporizador com defeito", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"avaliacao", aberto_em:"2026-06-15", fechado_em:null, classe:"melhoria", nota:"abertura manual OK e quase sem água; normalização do temporizador depende da manutenção"},
+  {id:39, desc:"Purga do pulmão — válvula solenoide (com temporizador acoplado) retirada por defeito de chuva/umidade", sub:"Utilidades (Ar/Água/Skid)", tc:"Geral", status:"avaliacao", aberto_em:"2026-06-15", fechado_em:null, classe:"melhoria", nota:"válvula com temporizador acoplado; nota aberta para troca por modelo 24V e demanda de engenharia para proteção contra chuva/umidade"},
   {id:40, desc:"Switch HPE Aruba 2930F (JL386A) instalado no rack do CTSS, substituindo os injetores PoE", sub:"Elétrica & Automação", tc:"Geral", status:"resolvido", aberto_em:"2026-06-15", fechado_em:"2026-06-15", nota:"trazido do G4 para o CTSS; endereça a alimentação PoE das câmeras"},
+  // 17/06
+  {id:41, desc:"Talha elétrica — fixação do cabo de aterramento corrigida", sub:"Elétrica & Automação", tc:"Geral", status:"resolvido", aberto_em:"2026-06-17", fechado_em:"2026-06-17"},
+  {id:42, desc:"Porta do misturador (fechadura eletrônica) abrindo sozinha durante a atividade — corrigida", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-06-17", fechado_em:"2026-06-17"},
+  // 18/06 — comissionamento das válvulas de amostragem
+  {id:43, desc:"Amostrador 01 — válvula abriu e não fechou; canal de coleta de amostras precisa estar operante", sub:"Mecânica & Acionamentos", tc:"Geral", status:"falha", aberto_em:"2026-06-18", fechado_em:null, classe:"impeditivo", nota:"precisa de intervenção da manutenção — a amostragem é essencial para a coleta confiável"},
+  {id:44, desc:"Amostrador 02 comissionado — 3 amostras com abertura de 4s (4,90 · 11,20 · 8,70 kg)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-18", fechado_em:"2026-06-18"},
+  {id:45, desc:"Amostrador 03 comissionado — 3 amostras com abertura de 4s (8,65 · 8,65 · 5,80 kg)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-18", fechado_em:"2026-06-18"},
 ];
 
 const SUBS = ["Elétrica & Automação","Instrumentação","Proteções / NR-12","Mecânica & Acionamentos","Utilidades (Ar/Água/Skid)","Processo & Ambiente"];
@@ -91,26 +98,31 @@ const refT = parseDate(REF);
 const CHECK = [
   { cond:'A vazio (descarregada)', total:45, testado:45, andamento:0, pendente:0 },
   { cond:'Descarregada e carregada', total:3, testado:3, andamento:0, pendente:0 },
-  { cond:'Com carga (carregada)', total:13, testado:0, andamento:13, pendente:0 },
+  { cond:'Com carga (carregada)', total:13, testado:6, andamento:7, pendente:0 },
   { cond:'Não aplicável (N/A)', total:3, na:true },
 ];
 const CURVAS = [
-  { titulo:'Volume de água × % de abertura da válvula', sistema:'Bomba Skid' },
-  { titulo:'Taxa de alimentação × frequência da rosca helicoidal', sistema:'Sistema de alimentação' },
-  { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Válvulas de amostragem TC10-Misturador, Misturador e TC03-TC07' },
+  { titulo:'Volume de água × % de abertura da válvula', sistema:'Bomba Skid', status:'aguardando' },
+  { titulo:'Taxa de alimentação × frequência da rosca helicoidal', sistema:'Sistema de alimentação', status:'aguardando' },
+  { titulo:'Tempo de abertura × massa amostrada (avaliar em diferentes umidades)', sistema:'Válvulas de amostragem TC10-Misturador, Misturador e TC03-TC07', status:'andamento',
+    dados:[
+      {rotulo:'Amostrador 02 · abertura 4s', valores:'4,90 · 11,20 · 8,70 kg'},
+      {rotulo:'Amostrador 03 · abertura 4s', valores:'8,65 · 8,65 · 5,80 kg'},
+    ],
+    nota:'Primeiros dados (18/06) com abertura de 4s. Amostrador 01 sem dado (válvula em falha). A curva completa requer mais tempos de abertura e diferentes umidades.' },
 ];
 
 const INSIGHTS = [
-  { icon:'📅', title:'Atualização de 15/06 — quatro frentes avançaram', badge:'ATUALIZAÇÃO', badgeColor:'bg-cyan-600', color:'border-cyan-400 bg-cyan-50',
-    text:'Purga do pulmão de ar comprimido testada (a vazio agora 100%): achado defeito na válvula solenoide e no temporizador — abertura manual OK, quase sem água; normalização com a manutenção. Switch HPE Aruba 2930F instalado no rack do CTSS, substituindo os injetores PoE. Câmeras termográficas novas testadas e funcionando — fixação será feita após preparar proteção contra umidade. Registrado o gotejamento residual dos bicos dispersores para a futura análise de dados de secagem.' },
+  { icon:'📅', title:'Atualizações recentes (15–18/06)', badge:'ATUALIZAÇÃO', badgeColor:'bg-cyan-600', color:'border-cyan-400 bg-cyan-50',
+    text:'15/06 — purga do pulmão testada (a vazio 100%): defeito na solenoide e no temporizador; switch HPE Aruba 2930F instalado (substitui os injetores PoE); câmeras novas testadas, fixação após proteção contra umidade; gotejamento dos bicos registrado para a análise de dados. 17/06 — talha elétrica (cabo de aterramento) e porta do misturador (fechadura abrindo sozinha) corrigidas; solenoide do pulmão retirada — nota para troca por 24V e demanda de engenharia para proteção contra chuva/umidade. 18/06 — comissionamento das válvulas de amostragem: amostradores 02 e 03 coletaram normalmente (abertura 4s), amostrador 01 abriu e não fechou (válvula em falha, precisa de manutenção).' },
   { icon:'🚀', title:'Comissionamento com carga em andamento', badge:'EM CURSO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
     text:'Skid aprovado em 08/06 liberou a fase com carga. Em 09/06, as válvulas de amostragem 01/02/03 foram testadas com bom comportamento. A etapa a vazio está concluída (100% testada).' },
   { icon:'🎥', title:'Câmeras termográficas: causa-raiz (umidade) identificada, encaminhada', badge:'ENCAMINHADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Trajetória: problema reincidente desde ~22/05 (suspeita inicial de PoE). O switch Aruba 2930F substituiu os injetores PoE e normalizou a alimentação. Identificou-se que a causa-raiz é a exposição à umidade. As câmeras novas foram testadas e funcionam; a fixação definitiva será feita depois de promover um ambiente protegido contra umidade — evitando nova reincidência. Pré-requisito da secagem, prazo 22/06 (com folga). Em paralelo, a câmera de processo da TC-10 precisa de compra.' },
   { icon:'🚰', title:'Gotejamento residual dos bicos após desligar — registro para a análise de dados', badge:'ATENÇÃO DADOS', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
     text:'Após desligar os bicos dispersores (TC-03 e TC-10), a água continua escoando e depois pinga por tempo prolongado. Registrado porque pode adicionar umidade fora da janela de operação e distorcer o cálculo de eficiência de secagem (risco de aparecer ganho de umidade em vez de perda). Convém caracterizar/corrigir antes de consolidar os dados de secagem.' },
-  { icon:'🧪', title:'Válvulas de amostragem: comportamento OK, conclusão pendente', badge:'PARCIAL', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
-    text:'Válvulas de amostragem 01, 02 e 03 testadas em 09/06 e se comportaram bem nas diferentes faixas de umidade. Como o material nas correias ainda está abaixo do nominal, o comissionamento das válvulas só será dado como concluído após o teste com a correia em capacidade máxima.' },
+  { icon:'🧪', title:'Amostragem: 02 e 03 OK, amostrador 01 em falha (impeditivo)', badge:'IMPEDITIVO', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
+    text:'O canal de coleta de amostras precisa estar operante — por isso o amostrador 01 é tratado como impeditivo. Em 18/06, no comissionamento com retirada de amostras (abertura de 4s): amostrador 02 → 4,90 / 11,20 / 8,70 kg e amostrador 03 → 8,65 / 8,65 / 5,80 kg coletaram normalmente; o amostrador 01 abriu e não fechou (válvula em falha, precisa de intervenção da manutenção). Conclusão plena ainda condicionada ao teste com a correia em capacidade máxima.' },
   { icon:'📡', title:'Sensor de vazamento de micro-ondas — trava de segurança mitigada', badge:'MITIGADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Único item com peso de segurança real. Enquanto o estudo não conclui, a operação se apoia em distância segura e medição com sensores portáteis. Concluir o estudo remove a dependência do controle interino.' },
   { icon:'⚡', title:'Falha 80C8 na F-037 (TC-03) — em tratamento, não impeditiva', badge:'EM TRATAMENTO', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
@@ -120,9 +132,9 @@ const INSIGHTS = [
 ];
 
 const MOVES = [
-  { tag:'Secagem', action:'Preparar um ambiente protegido contra umidade para as câmeras termográficas e fixar as câmeras novas (já testadas e funcionando); abrir a compra da câmera de processo da TC-10. Pré-requisito da secagem — prazo 22/06.' },
-  { tag:'Com carga', action:'Concluir o comissionamento das válvulas de amostragem com a correia em capacidade máxima — comportamento já validado em diferentes umidades.' },
-  { tag:'Em paralelo', action:'Normalizar a solenoide/temporizador da purga do pulmão com a manutenção; seguir tratando a falha 80C8 (F-037) e o estudo do sensor de micro-ondas; instalar borracha do limitador + cabo anti-chicoteamento; caracterizar o gotejamento residual dos bicos antes da análise de dados.' },
+  { tag:'Impeditivo', action:'PRIORIDADE: acionar a manutenção para a válvula do amostrador 01 (abriu e não fechou). É o único item impeditivo — o canal de coleta de amostras precisa estar operante. 02 e 03 já coletaram amostras em 18/06.' },
+  { tag:'Secagem', action:'Preparar ambientes protegidos contra umidade — fixar as câmeras termográficas novas (prazo 22/06) e atender a demanda de engenharia da solenoide do pulmão; abrir a compra da câmera de processo da TC-10.' },
+  { tag:'Em paralelo', action:'Trocar a solenoide do pulmão por modelo 24V (nota aberta); seguir tratando a falha 80C8 (F-037) e o estudo do sensor de micro-ondas; instalar borracha do limitador + cabo anti-chicoteamento; caracterizar o gotejamento residual dos bicos.' },
 ];
 
 function openAt(d){ return POINTS.filter(p => parseDate(p.aberto_em) <= d && (!p.fechado_em || parseDate(p.fechado_em) > d)).length; }
@@ -227,8 +239,8 @@ function Dashboard() {
   const KPIS = [
     { label:'Pontos levantados', value:total, sub:'registro consolidado', grad:'from-cyan-500 to-blue-600', bord:'border-cyan-500', icon:'🎯' },
     { label:'Taxa de resolução', value:rate+'%', sub:done+' resolvidos', grad:'from-emerald-500 to-teal-600', bord:'border-emerald-500', icon:'✅' },
-    { label:'Em aberto', value:open, sub:'não impeditivas', grad:'from-amber-500 to-orange-500', bord:'border-amber-500', icon:'📈' },
-    { label:'Falhas ativas', value:falhas, sub:'em tratamento (80C8)', grad:'from-red-500 to-rose-600', bord:'border-red-500', icon:'⚠️' },
+    { label:'Em aberto', value:open, sub:(impeditivos.length ? impeditivos.length+' impeditiva'+(impeditivos.length!==1?'s':'') : 'não impeditivas'), grad:'from-amber-500 to-orange-500', bord:'border-amber-500', icon:'📈' },
+    { label:'Falhas ativas', value:falhas, sub:'80C8 + válvula amostrador 01', grad:'from-red-500 to-rose-600', bord:'border-red-500', icon:'⚠️' },
   ];
 
   return (
@@ -254,7 +266,7 @@ function Dashboard() {
               Comissionamento TCMW
             </h1>
             <p className="text-slate-500 text-sm mt-1">Secagem de minério por micro-ondas · Resp.: Everton da Silva Campos · {total} pontos</p>
-            <p className="text-xs text-slate-400 mt-1">Início 18/05 · última atualização 15/06/2026</p>
+            <p className="text-xs text-slate-400 mt-1">Início 18/05 · última atualização 18/06/2026</p>
           </div>
           <button onClick={()=>setPrint(!print)} className={"flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm border transition-all " + (print ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50')}>
             🖨️ {print ? 'Tela' : 'Impressão'}
@@ -330,10 +342,16 @@ function Dashboard() {
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-bold text-slate-800 text-lg">{liberavel ? 'Operação liberável' : 'Liberação CONDICIONADA'}</span>
-                <span className={"text-xs font-bold text-white px-2 py-0.5 rounded-full " + (liberavel?'bg-emerald-500':'bg-amber-500')}>{impeditivos.length} impeditivo{impeditivos.length!==1?'s':''}</span>
+                <span className={"text-xs font-bold text-white px-2 py-0.5 rounded-full " + (liberavel?'bg-emerald-500':'bg-red-500')}>{impeditivos.length} impeditivo{impeditivos.length!==1?'s':''}</span>
               </div>
-              <p className="text-sm text-slate-700 mt-1">Nenhuma pendência impede a operação. As {openPts.length} em aberto: {mitigados.length} de segurança (mitigada), {tratamento.length} falha em tratamento e {melhorias.length} melhorias.</p>
+              <p className="text-sm text-slate-700 mt-1">{liberavel ? 'Nenhuma pendência impede a operação.' : impeditivos.length+' impeditiva'+(impeditivos.length!==1?'s':'')+' a resolver para liberar.'} As {openPts.length} em aberto: {impeditivos.length} impeditiva{impeditivos.length!==1?'s':''}, {mitigados.length} de segurança (mitigada), {tratamento.length} falha{tratamento.length!==1?'s':''} em tratamento e {melhorias.length} melhorias.</p>
               <div className="mt-3 space-y-1.5">
+                {impeditivos.map(p=>(
+                  <div key={p.id} className="flex items-start gap-2 bg-white border border-red-200 rounded-lg p-2">
+                    <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">IMPEDITIVO</span>
+                    <span className="text-xs text-slate-700">#{p.id} {p.desc}{p.nota ? ' — '+p.nota : ''}</span>
+                  </div>
+                ))}
                 {mitigados.map(m=>(
                   <div key={m.id} className="flex items-start gap-2 bg-white border border-blue-200 rounded-lg p-2">
                     <span className="text-[10px] font-bold text-white bg-blue-500 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">MITIGADO</span>
@@ -372,7 +390,7 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">✅ Checklist de comissionamento</h3>
-          <p className="text-slate-400 text-xs mb-3">Plano de testes — 64 ações (contagem distinta dos {total} pontos de pendências). A vazio 100% testado; condição carregada em andamento desde 09/06.</p>
+          <p className="text-slate-400 text-xs mb-3">Plano de testes — 64 ações (contagem distinta dos {total} pontos de pendências). A vazio 100% testado; com carga 6 de 13 testadas (desde 09/06).</p>
           <div className="space-y-2">
             {CHECK.map((c,i)=>{
               const segs=[['testado','#10b981',c.testado||0],['andamento','#0891b2',c.andamento||0],['pendente','#ef4444',c.pendente||0]];
@@ -398,7 +416,7 @@ function Dashboard() {
           </div>
           <div className="mt-2 flex items-start gap-2 bg-cyan-50 border border-cyan-200 rounded-xl p-3">
             <span className="mt-0.5">🧪</span>
-            <p className="text-xs text-slate-600">Carga em andamento: válvulas de amostragem 01/02/03 testadas (09/06) com bom comportamento em diferentes umidades. Conclusão condicionada a teste com a correia em <b>capacidade máxima</b> (material hoje abaixo do nominal).</p>
+            <p className="text-xs text-slate-600">Com carga: <b>6 de 13</b> ações testadas. Amostradores 02 e 03 coletaram amostras em 18/06; o <b>amostrador 01 está em falha (impeditivo)</b> e aguarda manutenção. Conclusão plena condicionada a teste com a correia em <b>capacidade máxima</b>.</p>
           </div>
         </div>
 
@@ -407,9 +425,22 @@ function Dashboard() {
           <p className="text-slate-400 text-xs mb-3">Levantamentos de caracterização pedidos pelo P&D — dependem da fase com carga</p>
           <div className="space-y-2">
             {CURVAS.map((c,i)=>(
-              <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-200 p-3">
-                <span className="text-[10px] font-bold text-white bg-slate-400 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">AGUARDANDO</span>
-                <div><p className="text-sm text-slate-700">{c.titulo}</p><p className="text-[11px] text-slate-400">{c.sistema}</p></div>
+              <div key={i} className={"rounded-xl border p-3 " + (c.status==='andamento' ? 'border-cyan-200 bg-cyan-50' : 'border-slate-200')}>
+                <div className="flex items-start gap-3">
+                  <span className={"text-[10px] font-bold text-white px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap " + (c.status==='andamento' ? 'bg-cyan-600' : 'bg-slate-400')}>{c.status==='andamento' ? 'EM ANDAMENTO' : 'AGUARDANDO'}</span>
+                  <div className="flex-1"><p className="text-sm text-slate-700">{c.titulo}</p><p className="text-[11px] text-slate-400">{c.sistema}</p></div>
+                </div>
+                {c.dados && (
+                  <div className="mt-2 ml-1 space-y-1">
+                    {c.dados.map((d,j)=>(
+                      <div key={j} className="flex items-center justify-between bg-white border border-cyan-100 rounded-lg px-2.5 py-1.5">
+                        <span className="text-[11px] text-slate-600">{d.rotulo}</span>
+                        <span className="text-[11px] font-bold text-slate-800 font-mono">{d.valores}</span>
+                      </div>
+                    ))}
+                    {c.nota && <p className="text-[11px] text-slate-500 mt-1">{c.nota}</p>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -417,7 +448,7 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">📉 Burndown · pendências por relatório</h3>
-          <p className="text-slate-400 text-xs mb-3">Do início (18/05) a 15/06 · mostra a descoberta (maio) e a resolução das pendências</p>
+          <p className="text-slate-400 text-xs mb-3">Do início (18/05) a 18/06 · mostra a descoberta (maio) e a resolução das pendências</p>
           <Burndown data={burndown}/>
         </div>
 
@@ -454,7 +485,7 @@ function Dashboard() {
 
         <div className={card + " p-5"}>
           <h3 className="font-bold text-slate-700 mb-1 flex items-center gap-2">⏱️ Idade das pendências em aberto</h3>
-          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição até 15/06 · ordenado do mais antigo</p>
+          <p className="text-slate-400 text-xs mb-4">Dias desde a 1ª aparição até 18/06 · ordenado do mais antigo</p>
           <div className="space-y-2">
             {aging.map(p=>{ const c=ageColor(p.idade,p.status); return (
               <div key={p.id} className={"flex items-center gap-3 rounded-xl p-2.5 " + c.bg}>
@@ -500,7 +531,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 pb-2">Registro consolidado dos relatórios de 18/05 a 15/06/2026 · datas de resolução anteriores a 28/05 são estimadas · classificação de TC/subsistema sujeita a revisão</p>
+        <p className="text-center text-xs text-slate-400 pb-2">Registro consolidado dos relatórios de 18/05 a 18/06/2026 · datas de resolução anteriores a 28/05 são estimadas · classificação de TC/subsistema sujeita a revisão</p>
       </div>
     </div>
   );
