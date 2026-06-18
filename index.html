@@ -79,8 +79,9 @@ const POINTS = [
   {id:42, desc:"Porta do misturador (fechadura eletrônica) abrindo sozinha durante a atividade — corrigida", sub:"Proteções / NR-12", tc:"Geral", status:"resolvido", aberto_em:"2026-06-17", fechado_em:"2026-06-17"},
   // 18/06 — comissionamento das válvulas de amostragem
   {id:43, desc:"Amostrador 01 — válvula abriu e não fechou; canal de coleta de amostras precisa estar operante", sub:"Mecânica & Acionamentos", tc:"Geral", status:"falha", aberto_em:"2026-06-18", fechado_em:null, classe:"impeditivo", nota:"precisa de intervenção da manutenção — a amostragem é essencial para a coleta confiável"},
-  {id:44, desc:"Amostrador 02 comissionado — 3 amostras com abertura de 4s (4,90 · 11,20 · 8,70 kg)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-18", fechado_em:"2026-06-18"},
-  {id:45, desc:"Amostrador 03 comissionado — 3 amostras com abertura de 4s (8,65 · 8,65 · 5,80 kg)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-18", fechado_em:"2026-06-18"},
+  {id:44, desc:"Amostrador 02 — coletou amostras (4s, carga máxima): 4,90 · 11,20 · 8,70 kg; comissionamento pendente", sub:"Mecânica & Acionamentos", tc:"Geral", status:"avaliacao", aberto_em:"2026-06-18", fechado_em:null, classe:"melhoria", nota:"alta dispersão entre as triplicatas — analisar antes de concluir"},
+  {id:45, desc:"Amostrador 03 — coletou amostras (4s, carga máxima): 8,65 · 8,65 · 5,80 kg; comissionamento pendente", sub:"Mecânica & Acionamentos", tc:"Geral", status:"avaliacao", aberto_em:"2026-06-18", fechado_em:null, classe:"melhoria", nota:"alta dispersão entre as triplicatas — analisar antes de concluir"},
+  {id:46, desc:"TCMW alimentada com carga máxima (marco da fase com carga)", sub:"Mecânica & Acionamentos", tc:"Geral", status:"resolvido", aberto_em:"2026-06-15", fechado_em:"2026-06-15"},
 ];
 
 const SUBS = ["Elétrica & Automação","Instrumentação","Proteções / NR-12","Mecânica & Acionamentos","Utilidades (Ar/Água/Skid)","Processo & Ambiente"];
@@ -109,20 +110,22 @@ const CURVAS = [
       {rotulo:'Amostrador 02 · abertura 4s', valores:'4,90 · 11,20 · 8,70 kg'},
       {rotulo:'Amostrador 03 · abertura 4s', valores:'8,65 · 8,65 · 5,80 kg'},
     ],
-    nota:'Primeiros dados (18/06) com abertura de 4s. Amostrador 01 sem dado (válvula em falha). A curva completa requer mais tempos de abertura e diferentes umidades.' },
+    nota:'Dados de 18/06 (abertura 4s) já sob carga máxima. Amostrador 01 sem dado (válvula em falha). Atenção: alta dispersão entre as triplicatas — analisar antes de consolidar. A curva completa requer mais tempos de abertura e diferentes umidades.' },
 ];
 
 const INSIGHTS = [
+  { icon:'🏭', title:'TCMW em carga máxima desde 15/06', badge:'MARCO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
+    text:'A TCMW está sendo alimentada com carga máxima desde 15/06 — marco da fase de comissionamento com carga. Isso elimina a antiga condicionante de "material abaixo do nominal" que travava a conclusão da amostragem; as coletas de 18/06 já foram sob carga máxima. Restam dois pontos na amostragem: o amostrador 01 em falha (impeditivo) e a análise da alta dispersão entre as triplicatas.' },
   { icon:'📅', title:'Atualizações recentes (15–18/06)', badge:'ATUALIZAÇÃO', badgeColor:'bg-cyan-600', color:'border-cyan-400 bg-cyan-50',
-    text:'15/06 — purga do pulmão testada (a vazio 100%): defeito na solenoide e no temporizador; switch HPE Aruba 2930F instalado (substitui os injetores PoE); câmeras novas testadas, fixação após proteção contra umidade; gotejamento dos bicos registrado para a análise de dados. 17/06 — talha elétrica (cabo de aterramento) e porta do misturador (fechadura abrindo sozinha) corrigidas; solenoide do pulmão retirada — nota para troca por 24V e demanda de engenharia para proteção contra chuva/umidade. 18/06 — comissionamento das válvulas de amostragem: amostradores 02 e 03 coletaram normalmente (abertura 4s), amostrador 01 abriu e não fechou (válvula em falha, precisa de manutenção).' },
+    text:'15/06 — TCMW passou a operar em carga máxima; purga do pulmão testada (a vazio 100%): defeito na solenoide e no temporizador; switch HPE Aruba 2930F instalado (substitui os injetores PoE); câmeras novas testadas, fixação após proteção contra umidade; gotejamento dos bicos registrado para a análise de dados. 17/06 — talha elétrica (cabo de aterramento) e porta do misturador (fechadura abrindo sozinha) corrigidas; solenoide do pulmão retirada — nota para troca por 24V e demanda de engenharia para proteção contra chuva/umidade. 18/06 — comissionamento das válvulas de amostragem: amostradores 02 e 03 coletaram normalmente (abertura 4s), amostrador 01 abriu e não fechou (válvula em falha, precisa de manutenção).' },
   { icon:'🚀', title:'Comissionamento com carga em andamento', badge:'EM CURSO', badgeColor:'bg-emerald-500', color:'border-emerald-400 bg-emerald-50',
     text:'Skid aprovado em 08/06 liberou a fase com carga. Em 09/06, as válvulas de amostragem 01/02/03 foram testadas com bom comportamento. A etapa a vazio está concluída (100% testada).' },
   { icon:'🎥', title:'Câmeras termográficas: causa-raiz (umidade) identificada, encaminhada', badge:'ENCAMINHADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Trajetória: problema reincidente desde ~22/05 (suspeita inicial de PoE). O switch Aruba 2930F substituiu os injetores PoE e normalizou a alimentação. Identificou-se que a causa-raiz é a exposição à umidade. As câmeras novas foram testadas e funcionam; a fixação definitiva será feita depois de promover um ambiente protegido contra umidade — evitando nova reincidência. Pré-requisito da secagem, prazo 22/06 (com folga). Em paralelo, a câmera de processo da TC-10 precisa de compra.' },
   { icon:'🚰', title:'Gotejamento residual dos bicos após desligar — registro para a análise de dados', badge:'ATENÇÃO DADOS', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
     text:'Após desligar os bicos dispersores (TC-03 e TC-10), a água continua escoando e depois pinga por tempo prolongado. Registrado porque pode adicionar umidade fora da janela de operação e distorcer o cálculo de eficiência de secagem (risco de aparecer ganho de umidade em vez de perda). Convém caracterizar/corrigir antes de consolidar os dados de secagem.' },
-  { icon:'🧪', title:'Amostragem: 02 e 03 OK, amostrador 01 em falha (impeditivo)', badge:'IMPEDITIVO', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
-    text:'O canal de coleta de amostras precisa estar operante — por isso o amostrador 01 é tratado como impeditivo. Em 18/06, no comissionamento com retirada de amostras (abertura de 4s): amostrador 02 → 4,90 / 11,20 / 8,70 kg e amostrador 03 → 8,65 / 8,65 / 5,80 kg coletaram normalmente; o amostrador 01 abriu e não fechou (válvula em falha, precisa de intervenção da manutenção). Conclusão plena ainda condicionada ao teste com a correia em capacidade máxima.' },
+  { icon:'🧪', title:'Amostragem: coletas sob carga máxima, mas com pendências', badge:'IMPEDITIVO', badgeColor:'bg-red-500', color:'border-red-400 bg-red-50',
+    text:'O canal de coleta de amostras precisa estar operante — por isso o amostrador 01 é tratado como impeditivo. Em 18/06, já sob carga máxima, na coleta com abertura de 4s: amostrador 02 → 4,90 / 11,20 / 8,70 kg e amostrador 03 → 8,65 / 8,65 / 5,80 kg. Dois pontos pendentes antes de concluir: (1) o amostrador 01 abriu e não fechou (válvula em falha, manutenção); (2) a dispersão entre as triplicatas ficou alta e precisa ser analisada — por isso 02 e 03 ainda não foram dados como concluídos.' },
   { icon:'📡', title:'Sensor de vazamento de micro-ondas — trava de segurança mitigada', badge:'MITIGADO', badgeColor:'bg-blue-500', color:'border-blue-400 bg-blue-50',
     text:'Único item com peso de segurança real. Enquanto o estudo não conclui, a operação se apoia em distância segura e medição com sensores portáteis. Concluir o estudo remove a dependência do controle interino.' },
   { icon:'⚡', title:'Falha 80C8 na F-037 (TC-03) — em tratamento, não impeditiva', badge:'EM TRATAMENTO', badgeColor:'bg-amber-500', color:'border-amber-400 bg-amber-50',
@@ -132,7 +135,7 @@ const INSIGHTS = [
 ];
 
 const MOVES = [
-  { tag:'Impeditivo', action:'PRIORIDADE: acionar a manutenção para a válvula do amostrador 01 (abriu e não fechou). É o único item impeditivo — o canal de coleta de amostras precisa estar operante. 02 e 03 já coletaram amostras em 18/06.' },
+  { tag:'Impeditivo', action:'PRIORIDADE: acionar a manutenção para a válvula do amostrador 01 (abriu e não fechou) — o canal de coleta de amostras precisa estar operante. Em paralelo, analisar a alta dispersão entre as triplicatas (02 e 03) antes de concluir o comissionamento da amostragem.' },
   { tag:'Secagem', action:'Preparar ambientes protegidos contra umidade — fixar as câmeras termográficas novas (prazo 22/06) e atender a demanda de engenharia da solenoide do pulmão; abrir a compra da câmera de processo da TC-10.' },
   { tag:'Em paralelo', action:'Trocar a solenoide do pulmão por modelo 24V (nota aberta); seguir tratando a falha 80C8 (F-037) e o estudo do sensor de micro-ondas; instalar borracha do limitador + cabo anti-chicoteamento; caracterizar o gotejamento residual dos bicos.' },
 ];
@@ -295,7 +298,7 @@ function Dashboard() {
             <div className="flex-1 rounded-xl border-2 border-cyan-400 bg-cyan-50 p-3 text-center">
               <div className="text-xs font-bold text-cyan-700 uppercase tracking-wide">Com carga</div>
               <div className="text-2xl my-0.5">🚀</div>
-              <div className="text-[11px] text-slate-500">em andamento</div>
+              <div className="text-[11px] text-slate-500">carga máxima</div>
             </div>
             <div className="text-xl text-slate-300 font-bold">▶</div>
             <div className="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-3 text-center">
@@ -306,7 +309,7 @@ function Dashboard() {
           </div>
           <div className="mt-3 flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
             <span className="mt-0.5">✅</span>
-            <p className="text-xs text-slate-600">Gate <b>APROVADO (08/06)</b>: teste do skid — bomba, bicos dispersores TC-03/TC-10, alimentação do silo e válvula helicoidal. Fase com carga em curso; conclusão das válvulas de amostragem condicionada a teste com a correia em capacidade máxima.</p>
+            <p className="text-xs text-slate-600">Gate <b>APROVADO (08/06)</b>: teste do skid — bomba, bicos dispersores TC-03/TC-10, alimentação do silo e válvula helicoidal. <b>TCMW em carga máxima desde 15/06.</b> Pendências da amostragem: amostrador 01 em falha (impeditivo) e análise da dispersão das triplicatas.</p>
           </div>
         </div>
 
@@ -416,7 +419,7 @@ function Dashboard() {
           </div>
           <div className="mt-2 flex items-start gap-2 bg-cyan-50 border border-cyan-200 rounded-xl p-3">
             <span className="mt-0.5">🧪</span>
-            <p className="text-xs text-slate-600">Com carga: <b>6 de 13</b> ações testadas. Amostradores 02 e 03 coletaram amostras em 18/06; o <b>amostrador 01 está em falha (impeditivo)</b> e aguarda manutenção. Conclusão plena condicionada a teste com a correia em <b>capacidade máxima</b>.</p>
+            <p className="text-xs text-slate-600">Com carga: <b>6 de 13</b> ações testadas, já em <b>carga máxima (desde 15/06)</b>. Amostradores 02 e 03 coletaram amostras em 18/06, mas o comissionamento deles segue pendente da análise da <b>alta dispersão entre as triplicatas</b>; o <b>amostrador 01 está em falha (impeditivo)</b> e aguarda manutenção.</p>
           </div>
         </div>
 
